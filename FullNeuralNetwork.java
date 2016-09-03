@@ -4,13 +4,13 @@ public class FullNeuralNetwork {
 	ArrayList<ArrayList<Neuron>> network;
 	ArrayList<ArrayList<ArrayList<Double>>> weights;
 
-	public FullNeuralNetwork( int[] numberOfNodes, int[] activationFunctionTypes ) {
+	public FullNeuralNetwork( int[] numberOfNodesOnLayers, int[] activationFunctionTypes ) {
 		// numberOfNodes.length layers, each of which is an array of Neuron
-		network = new ArrayList<ArrayList<Neuron>>( numberOfNodes.length );
+		network = new ArrayList<ArrayList<Neuron>>( numberOfNodesOnLayers.length );
 
-		for ( int i = 0 ; i < numberOfNodes.length ; i++ ) {
+		for ( int i = 0 ; i < numberOfNodesOnLayers.length ; i++ ) {
 			// layer i has numberOfNodes[i] neurons
-			network.set( i, new ArrayList<Neuron>(numberOfNodes[i]) );
+			network.set( i, new ArrayList<Neuron>(numberOfNodesOnLayers[i]) );
 			// initialize all the neurons in the layer
 			for (int j = 0 ; j < network.get(i).size() ; j ++ ) {
 				network.get(i).set( j, new Neuron() );
@@ -33,7 +33,7 @@ public class FullNeuralNetwork {
 	}
 	
 
-	public void getOutput() {
+	public ArrayList<Double> getOutput() {
 		
 	}
 }

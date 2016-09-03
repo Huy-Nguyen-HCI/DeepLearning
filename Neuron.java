@@ -1,6 +1,7 @@
 public class Neuron {
 
-	double input;
+	ArrayList<Double> inputs;
+	ArrayList<Double> weights;
 	int activationFunctionType = -1;
 
 	public static final int
@@ -21,23 +22,35 @@ public class Neuron {
 	}
 
 
-	public void setInput( double input ) {
-		this.input = input;
+	public void setInput( ArrayList<Double> inputs, ArrayList<Double> weights ) {
+		this.inputs = inputs;
+		this.weights = weights;
+	}
+
+
+	public double evaluateLinearCombination() {
+		double linearCombination = 0;
+		for (int i = 0 ; i < inputs.size(); i++ ) {
+			linearCombination += inputs.get(i) * weights.get(i);
+		}
+		return linearCombination;
 	}
 
 
 	public double output() {
 		switch ( activationFunctionType ) {
 			case LINEAR:
-				return ActivationFunctions.linearAF( input );
+				return ActivationFunctions.linearAF( evaluateLinearCombination() );
 			case STEP:
-				return (int) ActivationFunctions.stepAF( input );
+				return (int) ActivationFunctions.stepAF( evaluateLinearCombination() );
 			case SIGMOID:
-				return ActivationFunctions.sigmoidAF( input );
+				return ActivationFunctions.sigmoidAF( evaluateLinearCombination() );
 			case HYPERBOLIC:
-				return ActivationFunctions.hyperbolicAF( input );
+				return ActivationFunctions.hyperbolicAF( evaluateLinearCombination() );
 			case RELU:
-				return ActivationFunctions.reLUAF( input );
+				return ActivationFunctions.reLUAF( evaluateLinearCombination() );
+			case SOFTMAX:
+				return ActivationFunctions.softmaxAF( inputs );
 			default:
 				return input;
 		}
