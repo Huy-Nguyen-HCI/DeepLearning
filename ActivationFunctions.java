@@ -52,7 +52,7 @@ public class ActivationFunctions {
 	 * @param x the input value from the program or previous layer.
 	 * @return 0 if <tt>x</tt> is negative and <tt>x</tt> itself otherwise.
 	 */
-	public static double ReLUAF( double x ) {
+	public static double reLUAF( double x ) {
 		return Math.max(0, x);
 	}
 
@@ -67,7 +67,6 @@ public class ActivationFunctions {
 		for ( double v : outputNeuron) {
 			sum += Math.exp(v);
 		}
-
 		double[] prob = new double[outputNeuron.length];
 		for (int i = 0 ; i < prob.length; i++) {
 			prob[i] = Math.exp( outputNeuron[i] ) / sum;
