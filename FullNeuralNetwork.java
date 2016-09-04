@@ -33,7 +33,21 @@ public class FullNeuralNetwork {
 	}
 	
 
-	public ArrayList<Double> getOutput() {
-		
+	public ArrayList<Double> getOutputsAtLayer( int layer ) {
+		ArrayList<Double> outputs = new ArrayList<Double>();
+		// base case
+		if (layer == 0 ) {
+			// get the outputs from the first layer, which are also the inputs
+			for ( int i = 0 ; i < network.get(0).size(); i++ ) {
+				outputs.add( network.get(0).output() );
+			}
+		}
+		else {
+			ArrayList<Double> prevLayerOutputs = getOutputsAtLayer( layer - 1 );
+			for ( int i = 0 ; i < network.get(layer).size(); i++ ) {
+				network.get(layer).
+			}
+		}
+		return outputs;
 	}
 }
