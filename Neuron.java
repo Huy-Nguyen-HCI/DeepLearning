@@ -2,8 +2,8 @@ import java.util.ArrayList;
 
 public class Neuron {
 
-	ArrayList<Double> inputs;
-	ArrayList<Double> weights;
+	double[] inputs;
+	double[] weights;
 	int activationFunctionType = -1;
 
 	public static final int
@@ -24,18 +24,18 @@ public class Neuron {
 	}
 
 
-	public void setInput( ArrayList<Double> inputs) {
+	public void setInput( double[] inputs) {
 		this.inputs = inputs;
 	}
 
-	public void setWeights( ArrayList<Double> weights ) {
+	public void setWeights( double[] weights ) {
 		this.weights = weights;
 	}
 
 	public double evaluateLinearCombination() {
 		double linearCombination = 0;
-		for (int i = 0 ; i < inputs.size(); i++ ) {
-			linearCombination += inputs.get(i) * weights.get(i);
+		for (int i = 0 ; i < inputs.length; i++ ) {
+			linearCombination += inputs[i] * weights[i];
 		}
 		return linearCombination;
 	}

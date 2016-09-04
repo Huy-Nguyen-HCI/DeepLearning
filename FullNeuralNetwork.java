@@ -1,8 +1,8 @@
 import java.util.ArrayList;
 
 public class FullNeuralNetwork {
-	ArrayList<ArrayList<Neuron>> network;
-	ArrayList<ArrayList<ArrayList<Double>>> weights;
+	Neuron[][] network;
+	double[][][] weights;
 
 	/**
 	 * Class constructor. Initializes the neural network based on the number of neuron and activation function for each layer.
@@ -10,12 +10,15 @@ public class FullNeuralNetwork {
 	 * @param activationFunctionTypes an array that contains the activation function type for each layer.
 	 */
 	public FullNeuralNetwork( int[] numberOfNodesOnLayers, int[] activationFunctionTypes ) {
+		// each layer except for the input layer must have an activation function
+		assert( activationFunctionTypes.length + 1 == numberOfNodesOnLayers.length );
+
 		// numberOfNodes.length layers, each of which is an array of Neuron
-		network = new ArrayList<ArrayList<Neuron>>();
+		network = new Neuron[numberOfNodesOnLayers.length][];
 
 		for ( int i = 0 ; i < numberOfNodesOnLayers.length ; i++ ) {
 			// layer i has numberOfNodes[i] neurons
-			network.add( new ArrayList<Neuron>(numberOfNodesOnLayers[i]) );
+			network[i] = new Neuron[numberOfNodesOnLayers[i]];
 			// initialize all the neurons in the layer
 			if ( i == 0 ) {
 				initInputNeuronLayer( numberOfNodesOnLayers[0] );
@@ -23,7 +26,7 @@ public class FullNeuralNetwork {
 			else {
 				initOtherNeuronLayer( numberOfNodesOnLayers[i], i, activationFunctionTypes[i - 1] );
 			}
-		}
+		}	
 	}
 
 	/**
@@ -33,32 +36,51 @@ public class FullNeuralNetwork {
 	 * @param activationFunctionTypes an array that contains the activation function type for each layer.
 	 */
 	public FullNeuralNetwork( int[] numberOfNodesOnLayers, int[] activationFunctionTypes, double[] bias ) {
-		this( numberOfNodesOnLayers, activationFunctionTypes );
-		for ( int i = 0 ; i < network.size() ; i++ ) {
-			if ( i < bias.length ) {
-				ArrayList<Neuron> layer = network.get(i);
-				layer.add( new BiasNeuron(bias[i]) );
+		// each layer except for the input layer must have an activation function
+		assert( activationFunctionTypes.length + 1 == numberOfNodesOnLayers.length );
+
+		// numberOfNodesOnLayers.length layers, each of which is an array of Neuron
+		network = new Neuron[numberOfNodesOnLayers.length][];
+		// initialize neurons
+		for ( int i = 0 ; i < numberOfNodesOnLayers.length ; i++ ) {
+			// layer i has numberOfNodes[i] + 1 neurons, the last one is a bias
+			int size = ( i < bias.length ) ? numberOfNodesOnLayers[i] + 1 : numberOfNodesOnLayers[i];
+			network[i] = new Neuron[size];
+			// initialize all the neurons in the layer
+			if ( i == 0 ) {
+				initInputNeuronLayer( numberOfNodesOnLayers[0] );
 			}
+			else {
+				initOtherNeuronLayer( numberOfNodesOnLayers[i], i, activationFunctionTypes[i - 1] );
+			}
+		}
+		// add bias neurons
+		for ( int i = 0 ; i < bias.length; i++ ) {
+			Neuron[] layer = network[i];
+			layer[layer.length - 1] = new BiasNeuron(bias[i]);
 		}
 	}
 
-	public void initOtherNeuronLayer( int layerSize, int layerIndex, int activationFunctionType ) {
-		for (int j = 0 ; j < layerSize; j++) {
-			network.get(layerIndex).add( new Neuron() );
-			network.get(layerIndex).get(j).setAFType( activationFunctionType );
-		}
-	}
 
 	public void initInputNeuronLayer( int layerSize ) {
 		for (int j = 0 ; j < layerSize; j++ ) {
-			network.get(0).add( new InputNeuron() );
+			network[0][j] = new InputNeuron();
 		}
 	}
 
+
+	public void initOtherNeuronLayer( int layerSize, int layerIndex, int activationFunctionType ) {
+		for (int j = 0 ; j < layerSize; j++) {
+			network[layerIndex][j] = new Neuron();
+			network[layerIndex][j].setAFType( activationFunctionType );
+		}
+	}
+
+
 	public void setInputs( double[] inputs ) {
-		for ( int i = 0 ; i < network.get(0).size(); i++ ) {
+		for ( int i = 0 ; i < network[0].length; i++ ) {
 			// first layer has input neurons
-			Neuron n = network.get(0).get(i);
+			Neuron n = network[0][i];
 			if ( n instanceof InputNeuron ) {
 				((InputNeuron) n).setInput( inputs[i] );
 			}
@@ -66,47 +88,56 @@ public class FullNeuralNetwork {
 	}
 
 
-	public void setWeights( ArrayList<ArrayList<ArrayList<Double>>> weights ) {
-		for ( int i = 0 ; i < network.size() ; i++ ) {
-			for (int j = 0 ; j < network.get(i).size(); i++ ) {
-				network.get(i).get(j).setWeights( weights.get(i).get(j) );
+	public void setWeights( double[][][] weights ) {
+		// every neuron except input neuron must have an array of weights
+		assert( weights.length == network.length - 1 );
+		for ( int i = 0 ; i < network.length ; i++ ) {
+			for (int j = 0 ; j < network[i].length; i++ ) {
+				setWeightsForNeuron(i, j, weights[i][j] );
 			}
 		}
 	}
+
+
+	public void setWeightsForNeuron( int layerIndex, int index, double[] weights ) {
+		network[layerIndex][index].setWeights( weights );
+	}
 	
 
-	public ArrayList<Double> getOutputsAtLayer( int layerIndex ) {
-		ArrayList<Double> outputs = new ArrayList<Double>();
-		ArrayList<Neuron> neuronLayer = network.get(layerIndex);
+	public double[] getOutputsAtLayer( int layerIndex ) {
+		Neuron[] neuronLayer = network[layerIndex];
+		double[] outputs = new double[neuronLayer.length];
 		// base case
 		if (layerIndex == 0 ) {
 			// get the outputs from the first layer, which are also the inputs
-			for ( int i = 0 ; i < neuronLayer.size(); i++ ) {
-				outputs.add( neuronLayer.get(i).output() );
+			for ( int i = 0 ; i < neuronLayer.length; i++ ) {
+				outputs[i] = neuronLayer[i].output();
 			}
 		}
 		else {
-			ArrayList<Double> prevLayerOutputs = getOutputsAtLayer( layerIndex - 1 );
+			double[] prevLayerOutputs = getOutputsAtLayer( layerIndex - 1 );
 			// softmax: need to compute output of all neurons at once
-			if ( neuronLayer.get(0).getAFType() == Neuron.SOFTMAX ) {
+			if ( neuronLayer[0].getAFType() == Neuron.SOFTMAX ) {
 				outputs = ActivationFunctions.softmaxAF( prevLayerOutputs );
 			}
 			// otherwise, compute output of each neuron independently and add to the output array
 			else {
-				for ( int i = 0 ; i < neuronLayer.size(); i++ ) {
-					Neuron n = neuronLayer.get(i);
+				for ( int i = 0 ; i < neuronLayer.length; i++ ) {
+					Neuron n = neuronLayer[i];
 					if ( !(n instanceof BiasNeuron) ) {
 						// give the neuron an array of inputs and array of weights
 						n.setInput( prevLayerOutputs );
 					}
-					outputs.add( n.output() );
+					outputs[i] =  n.output();
 				}
 			}
 		}
 		return outputs;
 	}
 
-	public ArrayList<Double> getOutputs() {
-		return getOutputsAtLayer( network.size() - 1);
+
+	public double[] getOutputs() {
+		return getOutputsAtLayer( network.length - 1);
 	}
+
 }

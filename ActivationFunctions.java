@@ -57,14 +57,14 @@ public class ActivationFunctions {
 	 * @param outputNeuron the array of output values from the previous layer.
 	 * @return an array of probability that the input falls into each class.
 	 */
-	public static ArrayList<Double> softmaxAF( ArrayList<Double> outputNeuron ) {
+	public static double[] softmaxAF( double[] outputNeuron ) {
 		double sum = 0;
 		for ( double v : outputNeuron) {
 			sum += Math.exp(v);
 		}
-		ArrayList<Double> prob = new ArrayList<Double>( outputNeuron.size() );
-		for (int i = 0 ; i < prob.size() ; i++) {
-			prob.add( Math.exp( outputNeuron.get(i) ) / sum );
+		double[] prob = new double[outputNeuron.length];
+		for (int i = 0 ; i < prob.length ; i++) {
+			prob[i] = Math.exp( outputNeuron[i] ) / sum;
 		}
 		return prob;
 	}
