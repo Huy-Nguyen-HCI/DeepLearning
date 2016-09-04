@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class Neuron {
 
 	ArrayList<Double> inputs;
@@ -22,11 +24,13 @@ public class Neuron {
 	}
 
 
-	public void setInput( ArrayList<Double> inputs, ArrayList<Double> weights ) {
+	public void setInput( ArrayList<Double> inputs) {
 		this.inputs = inputs;
-		this.weights = weights;
 	}
 
+	public void setWeights( ArrayList<Double> weights ) {
+		this.weights = weights;
+	}
 
 	public double evaluateLinearCombination() {
 		double linearCombination = 0;
@@ -49,10 +53,13 @@ public class Neuron {
 				return ActivationFunctions.hyperbolicAF( evaluateLinearCombination() );
 			case RELU:
 				return ActivationFunctions.reLUAF( evaluateLinearCombination() );
-			case SOFTMAX:
-				return ActivationFunctions.softmaxAF( inputs );
 			default:
-				return input;
+				System.err.println("Error. Undefined activation function");
+				return -1;
 		}
+	}
+
+	public int getAFType() {
+		return activationFunctionType;
 	}
 }

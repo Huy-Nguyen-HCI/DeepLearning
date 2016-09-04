@@ -1,11 +1,6 @@
-
+import java.util.ArrayList;
 
 public class ActivationFunctions {
-
-	public static void main( String[] args ) {
-		double[] prob = ActivationFunctions.softmaxAF( new double[]{0.9, 0.2, 0.4} );
-		for ( double x : prob ) System.out.println( x );
-	}
 
 	/**
 	 * Linear activation function used for regression neural networks.
@@ -62,14 +57,14 @@ public class ActivationFunctions {
 	 * @param outputNeuron the array of output values from the previous layer.
 	 * @return an array of probability that the input falls into each class.
 	 */
-	public static double[] softmaxAF( ArrayList<Double> outputNeuron ) {
+	public static ArrayList<Double> softmaxAF( ArrayList<Double> outputNeuron ) {
 		double sum = 0;
 		for ( double v : outputNeuron) {
 			sum += Math.exp(v);
 		}
-		double[] prob = new double[outputNeuron.size()];
-		for (int i = 0 ; i < prob.length; i++) {
-			prob[i] = Math.exp( outputNeuron[i] ) / sum;
+		ArrayList<Double> prob = new ArrayList<Double>( outputNeuron.size() );
+		for (int i = 0 ; i < prob.size() ; i++) {
+			prob.add( Math.exp( outputNeuron.get(i) ) / sum );
 		}
 		return prob;
 	}
