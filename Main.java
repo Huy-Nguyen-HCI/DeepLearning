@@ -3,12 +3,28 @@ import java.util.Arrays;
 
 public class Main {
 	public static void main(String[] args) {
-		FullNeuralNetwork andOperatorNeuralNetwork = 
-			new FullNeuralNetwork( new int[]{2,1}, new int[]{Neuron.STEP}, new double[]{1} );
-		andOperatorNeuralNetwork.setWeightsForNeuron( 1, 0, new double[]{1, 1, -1.5} );
-		andOperatorNeuralNetwork.setInputs( new double[]{1, 0} );
-		double[] outputs = andOperatorNeuralNetwork.getOutputs();
-		printArray(outputs);
+		FullNeuralNetwork xorOperatorNeuralNetwork = new FullNeuralNetwork( 
+			new int[]{2,2,2,1}, 
+			new int[]{Neuron.STEP, Neuron.STEP, Neuron.STEP}, 
+			new double[]{1, 1, 1} 
+		);
+		xorOperatorNeuralNetwork.setInputs( new double[]{1,1} );
+		xorOperatorNeuralNetwork.setWeights(
+			new double[][][]{
+				new double[][]{
+					new double[]{1, 1, -0.5},
+					new double[]{1, 1, -1,5}
+				},
+				new double[][]{
+					new double[]{1, 0, 0},
+					new double[]{0, -1, 0.5}
+				},
+				new double[][]{
+					new double[]{1, 1, -1,5}
+				}
+			}
+		);
+		printArray( xorOperatorNeuralNetwork.getOutputs() );
 	}
 
 	public static void printArray(double[] arr) {
