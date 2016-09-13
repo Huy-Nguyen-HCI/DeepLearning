@@ -110,6 +110,7 @@ public class FullNeuralNetwork {
 	public void setWeights( double[][][] weights ) {
 		// every neuron except input neuron must have an array of weights
 		assert( weights.length == network.length - 1 );
+		this.weights = weights;
 		for ( int i = 1 ; i < network.length ; i++ ) {
 			for (int j = 0 ; j < weights[i - 1].length; j++ ) {
 				setWeightsForNeuron(i, j, weights[i - 1][j] );
@@ -171,6 +172,11 @@ public class FullNeuralNetwork {
 	 */
 	public double[] getOutputs() {
 		return getOutputsAtLayer( network.length - 1);
+	}
+
+
+	public double[][][] getWeights() {
+		return weights;
 	}
 
 }

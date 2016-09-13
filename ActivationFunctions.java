@@ -17,8 +17,8 @@ public class ActivationFunctions {
 	 * @param x the input value from the program or previous layer.
 	 * @return 1 for incoming values of 0.5 or higher and 0 otherwise.
 	 */
-	public static int stepAF( double x ) {
-		return (x >= 0.5) ? 1 : 0;
+	public static double stepAF( double x ) {
+		return (x >= 0.5) ? 0.9 : 0.1;
 	}
 
 

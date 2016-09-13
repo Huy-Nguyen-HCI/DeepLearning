@@ -8,13 +8,12 @@ public class SimulatedAnnealing {
 
 	// global values
 	int numberOfIterations = 0;
-	int maxIterations = 1;
+	int maxIterations = 100;
 	double initialTemp = 1000;
 	double finalTemp = 0.5;
 	double currentError = Double.MAX_VALUE;
 	double globalBestError = currentError;
 	double[][][] globalBest;
-
 
 	public SimulatedAnnealing( FullNeuralNetwork network ) {
 		this.network = network;
@@ -24,7 +23,7 @@ public class SimulatedAnnealing {
 	public double[][][] train() {
 		double[][][] finalW = network.getWeights();
 		for ( int i = 0 ; i < maxIterations ; i++ ) {
-			finalW = iterate( network.getWeights(), 10 );
+			finalW = iterate( network.getWeights(), 50 );
 		}
 		System.out.println("output weight vector is: ");
 		for ( double x : finalW[0][0] ) {

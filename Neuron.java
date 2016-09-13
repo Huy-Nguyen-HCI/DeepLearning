@@ -46,7 +46,7 @@ public class Neuron {
 			case LINEAR:
 				return ActivationFunctions.linearAF( evaluateLinearCombination() );
 			case STEP:
-				return (int) ActivationFunctions.stepAF( evaluateLinearCombination() );
+				return ActivationFunctions.stepAF( evaluateLinearCombination() );
 			case SIGMOID:
 				return ActivationFunctions.sigmoidAF( evaluateLinearCombination() );
 			case HYPERBOLIC:
