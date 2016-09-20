@@ -12,6 +12,11 @@ public class ActivationFunctions {
 	}
 
 
+	public static double d_linearAF( double x ) {
+		return 1;
+	}
+
+
 	/**
 	 * Step activation function.
 	 * @param x the input value from the program or previous layer.
@@ -32,6 +37,12 @@ public class ActivationFunctions {
 	}
 
 
+	public static double d_sigmoidAF( double x ) {
+		double sigmoid = sigmoidAF( x );
+		return sigmoid * (1 - sigmoid);
+	}
+
+
 	/**
 	 * Hyperbolic activation function used for neural network that output values between -1 and 1.
 	 * @param x the input value from the program or previous layer.
@@ -42,6 +53,12 @@ public class ActivationFunctions {
 	}
 
 
+	public static double d_hyperbolicAF( double x ) {
+		double hyperbolic = hyperbolicAF(x);
+		return 1 - hyperbolic * hyperbolic;
+	}
+
+
 	/**
 	 * Rectified linear unit, recommended by most current researches on hidden layers.
 	 * @param x the input value from the program or previous layer.
@@ -49,6 +66,11 @@ public class ActivationFunctions {
 	 */
 	public static double reLUAF( double x ) {
 		return Math.max(0, x);
+	}
+
+
+	public static double d_reLUAF( double x ) {
+		return (x > 0) ? 1 : 0;
 	}
 
 
@@ -69,7 +91,8 @@ public class ActivationFunctions {
 		return prob;
 	}
 
-
+	// todo. derivative of softmax
+	
 	/**
 	 * Sigmoid function with bias in a single-input neural network.
 	 * @param x the input value.

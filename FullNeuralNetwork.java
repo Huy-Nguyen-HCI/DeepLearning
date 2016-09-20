@@ -1,8 +1,14 @@
 import java.util.Arrays;
 
 public class FullNeuralNetwork {
+	// types of loss function
+	public static final int 
+		MSE = 0,
+		CROSS_ENTROPY = 1;
+	int lossFunctionType = CROSS_ENTROPY; // default to be cross entropy
 	Neuron[][] network;
 	double[][][] weights;
+	double[] actualResults; // the known correct answers used for training
 
 	/**
 	 * Class constructor. Initializes the neural network based on the number of neuron and activation function for each layer.
@@ -92,48 +98,6 @@ public class FullNeuralNetwork {
 
 
 	/**
-	 * Sets the values for the input layer.
-	 * @param inputs an array of inputs being passed to the network.
-	 */
-	public void setInputs( double[] inputs ) {
-		for ( int i = 0 ; i < network[0].length; i++ ) {
-			// first layer has input neurons
-			Neuron n = network[0][i];
-			if ( n instanceof InputNeuron ) {
-				((InputNeuron) n).setInput( inputs[i] );
-			}
-		}
-	}
-
-
-	/**
-	 * Set the weights for each neuron in the network.
-	 * @param weights a 3-dimensional array representing the weights, 
-	 * where the indexes are: layer's index, neuron's index, neuron on previous layer's index.
-	 */ 
-	public void setWeights( double[][][] weights ) {
-		// every neuron except input neuron must have an array of weights
-		assert( weights.length == network.length - 1 );
-		this.weights = weights;
-		for ( int i = 1 ; i < network.length ; i++ ) {
-			for (int j = 0 ; j < weights[i - 1].length; j++ ) {
-				setWeightsForNeuron(i, j, weights[i - 1][j] );
-			}
-		}
-	}
-
-	/**
-	 * Set the weights array for a specified neuron in the network.
-	 * @param layerIndex index of the layer that contains the neuron.
-	 * @param index index of the neuron within the layer.
-	 * @param weights the weights array.
-	 */
-	public void setWeightsForNeuron( int layerIndex, int index, double[] weights ) {
-		network[layerIndex][index].setWeights( weights );
-	}
-	
-
-	/**
 	 * Evaluate the output for each neuron in the specified layer.
 	 * @param layerIndex the index of the layer.
 	 * @return an array of outputs from all neurons.
@@ -178,6 +142,7 @@ public class FullNeuralNetwork {
 		return getOutputsAtLayer( network.length - 1);
 	}
 
+
 	/**
 	 * Initialize the weight matrix to contain all 0s.
 	 */
@@ -196,8 +161,96 @@ public class FullNeuralNetwork {
 		}
 	}
 
+
+	public void computeNodeDeltaAtLayer( int layerIndex, int nodeIndex, double[] actualResults ) {
+		this.actualResults = actualResults;
+		if ( layerIndex == network.length - 1 ) {
+			computeNodeDeltaAtOutputLayer( nodeIndex );
+		} else {
+			computeNodeDeltaAtHiddenLayer( layerIndex, nodeIndex );
+		}
+	}
+
+
+	public void computeNodeDeltaAtOutputLayer( int nodeIndex ) {
+		assert( network[network.length - 1].length == actualResults.length );
+		Neuron node = network[ network.length - 1][nodeIndex];
+		switch (lossFunctionType) {
+			case MSE:
+				node.setDelta( (actualResults[nodeIndex] - node.output()) * node.getAFDerivative() );
+				break;
+			case CROSS_ENTROPY:
+				node.setDelta( actualResults[nodeIndex] - node.output() );
+				break;
+			default:
+				System.err.println("Error. Undefined loss function");
+				break;
+		}
+	}
+
+
+	public void computeNodeDeltaAtHiddenLayer( int layerIndex, int nodeIndex ) {
+		// this layer cannot be the hidden layer
+		assert( layerIndex < network.length - 1 );
+		Neuron node = network[layerIndex][nodeIndex];
+		double sum = 0;
+		Neuron[] nextLayer = network[layerIndex + 1];
+		for ( int i = 0 ; i < nextLayer.length ; i++ ) {
+			Neuron n = nextLayer[i];
+			sum += n.getWeights()[nodeIndex] * n.getDelta();
+		}
+		node.setDelta( node.getAFDerivative() * sum );
+	}
+
+
+	/**
+	 * Sets the values for the input layer.
+	 * @param inputs an array of inputs being passed to the network.
+	 */
+	public void setInputs( double[] inputs ) {
+		for ( int i = 0 ; i < network[0].length; i++ ) {
+			// first layer has input neurons
+			Neuron n = network[0][i];
+			if ( n instanceof InputNeuron ) {
+				((InputNeuron) n).setInput( inputs[i] );
+			}
+		}
+	}
+
+
+	/**
+	 * Set the weights for each neuron in the network.
+	 * @param weights a 3-dimensional array representing the weights, 
+	 * where the indexes are: layer's index, neuron's index, neuron on previous layer's index.
+	 */ 
+	public void setWeights( double[][][] weights ) {
+		// every neuron except input neuron must have an array of weights
+		assert( weights.length == network.length - 1 );
+		this.weights = weights;
+		for ( int i = 1 ; i < network.length ; i++ ) {
+			for (int j = 0 ; j < weights[i - 1].length; j++ ) {
+				setWeightsForNeuron(i, j, weights[i - 1][j] );
+			}
+		}
+	}
+
+	/**
+	 * Set the weights array for a specified neuron in the network.
+	 * @param layerIndex index of the layer that contains the neuron.
+	 * @param index index of the neuron within the layer.
+	 * @param weights the weights array.
+	 */
+	public void setWeightsForNeuron( int layerIndex, int index, double[] weights ) {
+		network[layerIndex][index].setWeights( weights );
+	}
+
+
 	public double[][][] getWeights() {
 		return weights;
 	}
 
+
+	public void setLossFunctionType( int type ) {
+		this.lossFunctionType = type;
+	}
 }
