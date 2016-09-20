@@ -1,4 +1,4 @@
-import java.util.ArrayList;
+import java.util.Arrays;
 
 public class FullNeuralNetwork {
 	Neuron[][] network;
@@ -26,7 +26,9 @@ public class FullNeuralNetwork {
 			else {
 				initOtherNeuronLayer( i, activationFunctionTypes[i - 1] );
 			}
-		}	
+		}
+
+		initializeWeights();	
 	}
 
 	/**
@@ -61,6 +63,8 @@ public class FullNeuralNetwork {
 			Neuron[] layer = network[i];
 			layer[layer.length - 1] = new BiasNeuron(bias[i]);
 		}
+
+		initializeWeights();
 	}
 
 
@@ -174,6 +178,23 @@ public class FullNeuralNetwork {
 		return getOutputsAtLayer( network.length - 1);
 	}
 
+	/**
+	 * Initialize the weight matrix to contain all 0s.
+	 */
+	public void initializeWeights() {
+		// nodes on all layers except the input layers have weights
+		weights = new double[ network.length - 1][][];
+		for ( int i = 1 ; i < network.length ; i++ ) {
+			// each node has its array of weights
+			weights[i - 1] = new double[network[i].length][];
+			for ( int j = 0 ; j < weights[i - 1].length ; j++ ) {
+				// each node is connected to all nodes from the previous layer
+				weights[i - 1][j] = new double[network[i - 1].length];
+				// set all weights to 0 initially
+				Arrays.fill( weights[i-1][j], 0 );
+			}
+		}
+	}
 
 	public double[][][] getWeights() {
 		return weights;

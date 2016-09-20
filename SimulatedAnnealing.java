@@ -9,7 +9,7 @@ public class SimulatedAnnealing {
 
 	// global values
 	int numberOfIterations = 0;
-	int maxIterations = 1000;
+	int maxIterations = 10000;
 	double initialTemp = 10000;
 	double finalTemp = 0.5;
 	double currentError = Double.MAX_VALUE;

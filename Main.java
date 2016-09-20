@@ -9,13 +9,6 @@ public class Main {
 			new int[]{Neuron.SIGMOID}, 
 			new double[]{1} 
 		);
-		andOperatorNeuralNetwork.setWeights(
-			new double[][][]{
-				new double[][]{
-					new double[]{1, 1, -1.5},
-				}
-			}
-		);
 		// training for AND
 		SimulatedAnnealing s = new SimulatedAnnealing( 
 			andOperatorNeuralNetwork,
@@ -28,7 +21,7 @@ public class Main {
 			new double[]{1, 0, 0, 0}
 		);
 		s.train();
-		System.out.println( "For this weight vector, the neural network outputs: " );
+		System.out.println( "\nFor this weight vector, the neural network outputs: " );
 		andOperatorNeuralNetwork.setInputs( new double[]{1 ,1} );
 		printArray( andOperatorNeuralNetwork.getOutputs() );
 		andOperatorNeuralNetwork.setInputs( new double[]{0 ,1} );
