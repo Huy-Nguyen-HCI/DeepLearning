@@ -8,7 +8,6 @@ public class LossFunction {
 			result += actual[i] * Math.log(predicted[i]) + (1 - actual[i]) * Math.log(1 - predicted[i]);
 		}
 		result = result * -1 / n;
-		// System.out.println( "predicted: " + predicted[0] + " actual : " + actual[0] + " result : " + result);
 		return result;
 	}
 
@@ -36,4 +35,5 @@ public class LossFunction {
 		result = result / n;
 		return result;
 	}
+
 }

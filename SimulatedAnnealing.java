@@ -1,5 +1,6 @@
 import java.util.Random;
 import java.util.Arrays;
+import java.util.ArrayList;
 
 public class SimulatedAnnealing {
 
@@ -8,15 +9,20 @@ public class SimulatedAnnealing {
 
 	// global values
 	int numberOfIterations = 0;
-	int maxIterations = 100;
-	double initialTemp = 1000;
+	int maxIterations = 1000;
+	double initialTemp = 10000;
 	double finalTemp = 0.5;
 	double currentError = Double.MAX_VALUE;
 	double globalBestError = currentError;
 	double[][][] globalBest;
 
-	public SimulatedAnnealing( FullNeuralNetwork network ) {
+	double[][] inputs;
+	double[] outputs;
+
+	public SimulatedAnnealing( FullNeuralNetwork network, double[][] inputs, double[] outputs ) {
 		this.network = network;
+		this.inputs = inputs;
+		this.outputs = outputs;
 	}
 
 
@@ -29,9 +35,7 @@ public class SimulatedAnnealing {
 		for ( double x : finalW[0][0] ) {
 			System.out.print(x + " ");
 		}
-		System.out.println( "For this weight vector, the neural network outputs: " );
 		network.setWeights( finalW );
-		Main.printArray( network.getOutputs() );
 		return finalW;
 	}
 
@@ -49,7 +53,14 @@ public class SimulatedAnnealing {
 			performRandomize( weights );
 			// check new score
 			network.setWeights( weights );
-			trialError = LossFunction.logLoss( network.getOutputs(), new double[]{0.1} );
+
+			// get output from network
+			double[] o = new double[ inputs.length ];
+			for ( int j = 0 ; j < inputs.length ; j++ ) {
+				network.setInputs( inputs[j] );
+				o[j] = network.getOutputs()[0];
+			}
+			trialError = LossFunction.logLoss( o, outputs );
 			boolean keep = trialError < currentError;
 			// if this move results in worse score, there is still a probability that we take it
 			if ( !keep ) {
@@ -110,12 +121,15 @@ public class SimulatedAnnealing {
 		for ( int i = 0 ; i < weights.length ; i++ ) {
 			for ( int j = 0 ; j < weights[i].length ; j++ ) {
 				for ( int k = 0 ; k < weights[i][j].length ; k++ ) {
-					weights[i][j][k] = rand.nextDouble();
+					weights[i][j][k] += getRandomNumberInRange(-1, 1);
 				}
 			}
 		}
 		return weights;
 	}
 
-
+	public double getRandomNumberInRange( double start, double end ) {
+		double random = rand.nextDouble();
+		return start + (random * (end - start));
+	}
 }

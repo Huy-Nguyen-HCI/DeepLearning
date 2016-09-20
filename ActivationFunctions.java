@@ -18,7 +18,7 @@ public class ActivationFunctions {
 	 * @return 1 for incoming values of 0.5 or higher and 0 otherwise.
 	 */
 	public static double stepAF( double x ) {
-		return (x >= 0.5) ? 0.9 : 0.1;
+		return (x >= 0.5) ? 1 : 0;
 	}
 
 
