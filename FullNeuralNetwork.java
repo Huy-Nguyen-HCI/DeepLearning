@@ -156,7 +156,9 @@ public class FullNeuralNetwork {
 				// each node is connected to all nodes from the previous layer
 				weights[i - 1][j] = new double[network[i - 1].length];
 				// set all weights to 0 initially
-				Arrays.fill( weights[i-1][j], 0 );
+				for ( int k = 0 ; k < weights[i-1][j].length ; k++ ) {
+					weights[i-1][j][k] = Main.getRandomNumberInRange(-0.5, 0.5);                       
+				}
 			}
 		}
 	}

@@ -1,6 +1,5 @@
-import java.util.Random;
 import java.util.Arrays;
-import java.util.ArrayList;
+import java.util.Random;
 
 public class SimulatedAnnealing {
 
@@ -9,7 +8,7 @@ public class SimulatedAnnealing {
 
 	// global values
 	int numberOfIterations = 0;
-	int maxIterations = 1000;
+	int maxIterations = 50000;
 	double initialTemp = 10000;
 	double finalTemp = 0.5;
 	double currentError = Double.MAX_VALUE;
@@ -29,18 +28,20 @@ public class SimulatedAnnealing {
 	public double[][][] train() {
 		double[][][] finalW = network.getWeights();
 		for ( int i = 0 ; i < maxIterations ; i++ ) {
-			finalW = iterate( network.getWeights(), 50 );
+			iterate( network.getWeights(), 50 );
 		}
+		finalW = globalBest;
 		System.out.println("output weight vector is: ");
 		for ( double x : finalW[0][0] ) {
 			System.out.print(x + " ");
 		}
+		System.out.println("global best error is " + globalBestError);
 		network.setWeights( finalW );
 		return finalW;
 	}
 
 
-	public double[][][] iterate( double[][][] weights, int cycles ) {
+	public void iterate( double[][][] weights, int cycles ) {
 		numberOfIterations ++;
 		double trialError = -1;
 		double p = -1;
@@ -85,11 +86,13 @@ public class SimulatedAnnealing {
 		}
 		System.out.println(
 			"Iteration #" + numberOfIterations + 
-			" score =" + trialError + 
-			" prob=" + p +
-			" temp=" + currentTemperature
+			" global score =" + globalBestError + 
+			" weight = \n"
 		);
-		return weights;
+		for ( double x : weights[0][0] ) {
+			System.out.print(x + " ");
+		}
+		System.out.println();
 	}
 
 
@@ -121,15 +124,10 @@ public class SimulatedAnnealing {
 		for ( int i = 0 ; i < weights.length ; i++ ) {
 			for ( int j = 0 ; j < weights[i].length ; j++ ) {
 				for ( int k = 0 ; k < weights[i][j].length ; k++ ) {
-					weights[i][j][k] += getRandomNumberInRange(-1, 1);
+					weights[i][j][k] += Main.getRandomNumberInRange(-1, 1);
 				}
 			}
 		}
 		return weights;
-	}
-
-	public double getRandomNumberInRange( double start, double end ) {
-		double random = rand.nextDouble();
-		return start + (random * (end - start));
 	}
 }
