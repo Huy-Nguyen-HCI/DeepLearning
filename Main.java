@@ -10,17 +10,18 @@ public class Main {
 			new double[]{1, 1, 1} 
 		);
 		// training for AND
-		// SimulatedAnnealing s = new SimulatedAnnealing( 
-		// 	andOperatorNeuralNetwork,
-		// 	new double[][]{
-		// 		new double[]{1, 1},
-		// 		new double[]{1, 0},
-		// 		new double[]{0, 1},
-		// 		new double[]{0, 0}
-		// 	},
-		// 	new double[]{0, 1, 1, 0}
-		// );
-		// s.train();
+		SimulatedAnnealing s = new SimulatedAnnealing( 
+			andOperatorNeuralNetwork,
+			new double[][]{
+				new double[]{1, 1},
+				new double[]{1, 0},
+				new double[]{0, 1},
+				new double[]{0, 0}
+			},
+			new double[]{0, 1, 1, 0}
+		);
+		s.train();
+		
 		System.out.println( "\nFor this weight vector, the neural network outputs: " );
 		andOperatorNeuralNetwork.setInputs( new double[]{1 ,1} );
 		printArray( andOperatorNeuralNetwork.getOutputs() );

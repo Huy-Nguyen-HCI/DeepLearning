@@ -159,6 +159,8 @@ public class FullNeuralNetwork {
 				for ( int k = 0 ; k < weights[i-1][j].length ; k++ ) {
 					weights[i-1][j][k] = Main.getRandomNumberInRange(-0.5, 0.5);                       
 				}
+				// assign weight array to neuron
+				network[i][j].setWeights( weights[i-1][j] );
 			}
 		}
 	}
