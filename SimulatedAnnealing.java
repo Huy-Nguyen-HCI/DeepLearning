@@ -8,9 +8,9 @@ public class SimulatedAnnealing {
 
 	// global values
 	int numberOfIterations = 0;
-	int maxIterations = 50000;
-	double initialTemp = 10000;
-	double finalTemp = 0.5;
+	int maxIterations = 100;
+	double initialTemp = 400;
+	double finalTemp = 0.0001;
 	double currentError = Double.MAX_VALUE;
 	double globalBestError = currentError;
 	double[][][] globalBest;
@@ -26,6 +26,7 @@ public class SimulatedAnnealing {
 
 
 	public double[][][] train() {
+		numberOfIterations = 0;
 		double[][][] finalW = network.getWeights();
 		for ( int i = 0 ; i < maxIterations ; i++ ) {
 			iterate( network.getWeights(), 50 );
@@ -102,7 +103,7 @@ public class SimulatedAnnealing {
 
 
 	public double calcProbability( double currentError, double previousError, double currentTemp ) {
-		return Math.exp( (currentError - previousError) / currentTemp );
+		return Math.exp( -(Math.abs(currentError - previousError)) / currentTemp );
 	}
 
 	public double[][][] cloneWeights( double[][][] weights ) {
@@ -124,7 +125,7 @@ public class SimulatedAnnealing {
 		for ( int i = 0 ; i < weights.length ; i++ ) {
 			for ( int j = 0 ; j < weights[i].length ; j++ ) {
 				for ( int k = 0 ; k < weights[i][j].length ; k++ ) {
-					weights[i][j][k] += Main.getRandomNumberInRange(-1, 1);
+					weights[i][j][k] += Main.getRandomNumberInRange(-0.1, 0.1);
 				}
 			}
 		}
