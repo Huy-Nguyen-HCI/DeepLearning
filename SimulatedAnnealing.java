@@ -8,7 +8,7 @@ public class SimulatedAnnealing {
 
 	// global values
 	int numberOfIterations = 0;
-	int maxIterations = 100;
+	final int maxIterations = 100, cyclesPerIteration = 50;
 	double initialTemp = 400;
 	double finalTemp = 0.0001;
 	double currentError = Double.MAX_VALUE;
@@ -27,18 +27,16 @@ public class SimulatedAnnealing {
 
 	public double[][][] train() {
 		numberOfIterations = 0;
-		double[][][] finalW = network.getWeights();
 		for ( int i = 0 ; i < maxIterations ; i++ ) {
-			iterate( network.getWeights(), 50 );
+			iterate( cloneWeights(network.getWeights()), cyclesPerIteration );
 		}
-		finalW = globalBest;
-		System.out.println("output weight vector is: ");
-		for ( double x : finalW[0][0] ) {
+		System.out.println("\noutput weight vector is: ");
+		for ( double x : globalBest[0][0] ) {
 			System.out.print(x + " ");
 		}
 		System.out.println("global best error is " + globalBestError);
-		network.setWeights( finalW );
-		return finalW;
+		network.setWeights( globalBest );
+		return globalBest;
 	}
 
 
@@ -86,9 +84,9 @@ public class SimulatedAnnealing {
 			}
 		}
 		System.out.println(
-			"Iteration #" + numberOfIterations + 
+			"\nIteration #" + numberOfIterations + 
 			" global score =" + globalBestError + 
-			" weight = \n"
+			" weight ="
 		);
 		for ( double x : weights[0][0] ) {
 			System.out.print(x + " ");
