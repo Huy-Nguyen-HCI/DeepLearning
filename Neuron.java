@@ -42,6 +42,11 @@ public class Neuron {
 	}
 
 
+	public void setWeight( int index, double newWeight ) {
+		weights[index] = newWeight;
+	}
+
+
 	public double[] getWeights() {
 		return weights;
 	}

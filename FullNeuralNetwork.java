@@ -9,6 +9,9 @@ public class FullNeuralNetwork {
 	Neuron[][] network;
 	double[][][] weights;
 	double[] actualResults; // the known correct answers used for training
+	// weight change from the previous iteration, used for backpropagation
+	double[][][] weightDeltas; 
+	double learningRate = 0.5, momentum = 0;
 
 	/**
 	 * Class constructor. Initializes the neural network based on the number of neuron and activation function for each layer.
@@ -165,6 +168,21 @@ public class FullNeuralNetwork {
 		}
 	}
 
+	/**
+	 * Set weightDeltas to be an array with the same dimension as weights,
+	 * with all numbers initialized to 0.
+	 */
+	public void initializeWeightDeltas() {
+		weightDeltas = new double[ weights.length ][][];
+		for ( int i = 0 ; i < weights.length ; i++ ) {
+			weightDeltas[i] = new double[ weights[i].length ][];
+			for ( int j = 0 ; j < weights[i].length ; j++ ) {
+				weightDeltas[i][j] = new double[ weights[i][j].length ];
+				Arrays.fill( weightDeltas[i][j], 0);
+			}
+		}
+	}
+
 
 	public void computeNodeDeltaAtLayer( int layerIndex, int nodeIndex, double[] actualResults ) {
 		this.actualResults = actualResults;
@@ -238,6 +256,24 @@ public class FullNeuralNetwork {
 		}
 	}
 
+
+	/**
+	 * Update the weight arrays of a node at a specified position.
+	 * <tt>newWeight = oldWeight - weightDelta</tt>
+	 */
+	public void updateWeights( int layerIndex, int nodeIndex ) {
+		Neuron node = network[layerIndex][nodeIndex];
+		for ( int i = 0 ; i < node.getWeights().length ; i++ ) {
+			double gradient = node.getDelta() * node.output();
+			double prevWeightDelta = weightDeltas[layerIndex][nodeIndex][i];
+			weightDeltas[layerIndex][nodeIndex][i] = 
+				-learningRate * gradient + momentum * prevWeightDelta;
+			double newWeight = node.getWeights()[i] - weightDeltas[layerIndex][nodeIndex][i];
+			node.setWeights( i, newWeight );
+		}
+	}
+
+
 	/**
 	 * Set the weights array for a specified neuron in the network.
 	 * @param layerIndex index of the layer that contains the neuron.
@@ -256,5 +292,15 @@ public class FullNeuralNetwork {
 
 	public void setLossFunctionType( int type ) {
 		this.lossFunctionType = type;
+	}
+
+
+	public double setLearningRate( double learningRate ) {
+		this.learningRate = learningRate;
+	}
+
+
+	public double setMomentum( double momentum ) {
+		this.momentum = momentum;
 	}
 }
