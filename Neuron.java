@@ -1,9 +1,8 @@
-
+import java.util.Arrays;
 
 public class Neuron {
 
 	double[] inputs;
-	double[] weights;
 	int activationFunctionType = -1;
 	double delta;
 
@@ -37,22 +36,8 @@ public class Neuron {
 	}
 
 
-	public void setWeights( double[] weights ) {
-		this.weights = weights;
-	}
 
-
-	public void setWeight( int index, double newWeight ) {
-		weights[index] = newWeight;
-	}
-
-
-	public double[] getWeights() {
-		return weights;
-	}
-
-
-	public double evaluateLinearCombination() {
+	public double evaluateLinearCombination( double[] weights ) {
 		double linearCombination = 0;
 		for (int i = 0 ; i < inputs.length; i++ ) {
 			linearCombination += inputs[i] * weights[i];
@@ -61,19 +46,19 @@ public class Neuron {
 	}
 
 
-	public double output() {
+	public double output( double[] weights ) {
 		// todo. save output to a variable
 		switch ( activationFunctionType ) {
 			case LINEAR:
-				return ActivationFunctions.linearAF( evaluateLinearCombination() );
+				return ActivationFunctions.linearAF( evaluateLinearCombination( weights ) );
 			case STEP:
-				return ActivationFunctions.stepAF( evaluateLinearCombination() );
+				return ActivationFunctions.stepAF( evaluateLinearCombination( weights ) );
 			case SIGMOID:
-				return ActivationFunctions.sigmoidAF( evaluateLinearCombination() );
+				return ActivationFunctions.sigmoidAF( evaluateLinearCombination( weights ) );
 			case HYPERBOLIC:
-				return ActivationFunctions.hyperbolicAF( evaluateLinearCombination() );
+				return ActivationFunctions.hyperbolicAF( evaluateLinearCombination( weights ) );
 			case RELU:
-				return ActivationFunctions.reLUAF( evaluateLinearCombination() );
+				return ActivationFunctions.reLUAF( evaluateLinearCombination( weights ) );
 			default:
 				System.err.println("Error. Undefined activation function");
 				return -1;
@@ -81,16 +66,16 @@ public class Neuron {
 	}
 
 
-	public double getAFDerivative() {
+	public double getAFDerivative( double[] weights ) {
 		switch ( activationFunctionType ) {
 			case LINEAR:
-				return ActivationFunctions.d_linearAF( output() );
+				return ActivationFunctions.d_linearAF( evaluateLinearCombination( weights ) );
 			case SIGMOID:
-				return ActivationFunctions.d_sigmoidAF( output() );
+				return ActivationFunctions.d_sigmoidAF( evaluateLinearCombination( weights ) );
 			case HYPERBOLIC:
-				return ActivationFunctions.d_hyperbolicAF( output() );
+				return ActivationFunctions.d_hyperbolicAF( evaluateLinearCombination( weights ) );
 			case RELU:
-				return ActivationFunctions.d_reLUAF( output() );
+				return ActivationFunctions.d_reLUAF( evaluateLinearCombination( weights ) );
 			default:
 				System.err.println("Error. Undefined activation function");
 				return -1;

@@ -7,7 +7,7 @@ public class BiasNeuron extends Neuron{
 		this.bias = bias;
 	}
 
-	@Override
+
 	public double output() {
 		return bias;
 	}

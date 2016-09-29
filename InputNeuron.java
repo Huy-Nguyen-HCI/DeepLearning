@@ -5,7 +5,7 @@ public class InputNeuron extends Neuron {
 		this.input = input;
 	}
 
-	@Override
+
 	public double output() {
 		return input;
 	}

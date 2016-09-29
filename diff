@@ -1,0 +1,60 @@
+diff --git a/Main.java b/Main.java
+index fcc0050..dd55c7e 100644
+--- a/Main.java
++++ b/Main.java
+@@ -4,43 +4,21 @@ import java.util.Random;
+ public class Main {
+ 
+ 	public static void main( String[] args ) {
+-		FullNeuralNetwork logicOperatorNeuralNetwork = new FullNeuralNetwork( 
+-			new int[]{2,2,1}, 
+-			new int[]{Neuron.SIGMOID, Neuron.SIGMOID}, 
+-			new double[]{ 1, 1} 
++		FullNeuralNetwork example =  new FullNeuralNetwork(
++			new int[]{2,2,2},
++			new int[]{Neuron.SIGMOID, Neuron.SIGMOID},
++			new double[]{1,1,1}
++		)
++		example.setWeights(
++			new double[][][]{
++				new double[][]{
++					new double[]{0.15, 0.20},
++				}
++			}
+ 		);
+-		
+-		// training for AND
+-		SimulatedAnnealing s = new SimulatedAnnealing( 
+-			logicOperatorNeuralNetwork,
+-			new double[][]{
+-				new double[]{1, 1},
+-				new double[]{1, 0},
+-				new double[]{0, 1},
+-				new double[]{0, 0}
+-			},
+-			new double[]{0, 1, 1, 0}
+-		);
+-		for ( int i = 0 ; i < 30 ; i++ )
+-		{
+-			s.train();
+-		}
+-
+-		logicOperatorNeuralNetwork.setInputs( new double[]{1 ,1} );
+-		printArray( logicOperatorNeuralNetwork.getOutputs() );
+-
+-		logicOperatorNeuralNetwork.setInputs( new double[]{0 ,1} );
+-		printArray( logicOperatorNeuralNetwork.getOutputs() );
+-
+-		logicOperatorNeuralNetwork.setInputs( new double[]{1 ,0} );
+-		printArray( logicOperatorNeuralNetwork.getOutputs() );
+-
+-		logicOperatorNeuralNetwork.setInputs( new double[]{0 ,0} );
+-		printArray( logicOperatorNeuralNetwork.getOutputs() );
+-
+ 	}
+ 
+-	
++
+ 	public static void printArray(double[] arr) {
+ 		for ( double x : arr ) System.out.println(x);
+ 	}

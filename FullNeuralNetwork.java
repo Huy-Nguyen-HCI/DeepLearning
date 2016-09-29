@@ -5,10 +5,12 @@ public class FullNeuralNetwork {
 	public static final int 
 		MSE = 0,
 		CROSS_ENTROPY = 1;
-	int lossFunctionType = CROSS_ENTROPY; // default to be cross entropy
+	int lossFunctionType = MSE; // default to be cross entropy
 	Neuron[][] network;
 	double[][][] weights;
-	double[] actualResults; // the known correct answers used for training
+	// save the new weights to an array because all the weights
+	// need to be updated at once
+	double[][][] tempWeights;
 	// weight change from the previous iteration, used for backpropagation
 	double[][][] weightDeltas; 
 	double learningRate = 0.5, momentum = 0;
@@ -112,7 +114,13 @@ public class FullNeuralNetwork {
 		if (layerIndex == 0 ) {
 			// get the outputs from the first layer, which are also the inputs
 			for ( int i = 0 ; i < neuronLayer.length; i++ ) {
-				outputs[i] = neuronLayer[i].output();
+				Neuron n = neuronLayer[i];
+				if (n instanceof BiasNeuron ) {
+					outputs[i] = ((BiasNeuron) neuronLayer[i]).output();
+				}
+				else {
+					outputs[i] = ((InputNeuron) neuronLayer[i]).output();
+				}
 			}
 		}
 		else {
@@ -126,10 +134,13 @@ public class FullNeuralNetwork {
 				for ( int i = 0 ; i < neuronLayer.length; i++ ) {
 					Neuron n = neuronLayer[i];
 					if ( !(n instanceof BiasNeuron) ) {
-						// give the neuron an array of inputs and array of weights
+						// give the neuron an array of inputs
 						n.setInput( prevLayerOutputs );
+						outputs[i] = n.output( weights[layerIndex - 1][i] );
 					}
-					outputs[i] =  n.output();
+					else {
+						outputs[i] = ( (BiasNeuron) n).output();
+					}
 				}
 			}
 		}
@@ -142,7 +153,7 @@ public class FullNeuralNetwork {
 	 * @return the array output of the final layer in the network.
 	 */
 	public double[] getOutputs() {
-		return getOutputsAtLayer( network.length - 1);
+		return getOutputsAtLayer( network.length - 1 );
 	}
 
 
@@ -162,8 +173,6 @@ public class FullNeuralNetwork {
 				for ( int k = 0 ; k < weights[i-1][j].length ; k++ ) {
 					weights[i-1][j][k] = Main.getRandomNumberInRange(-1, 1);                       
 				}
-				// assign weight array to neuron
-				network[i][j].setWeights( weights[i-1][j] );
 			}
 		}
 	}
@@ -184,25 +193,40 @@ public class FullNeuralNetwork {
 	}
 
 
-	public void computeNodeDeltaAtLayer( int layerIndex, int nodeIndex, double[] actualResults ) {
-		this.actualResults = actualResults;
+	public void initializeTempWeights() {
+		tempWeights = cloneWeights( weights );
+	}
+
+
+	public void computeNodeDeltas( double[] targets ) {
+		getOutputs();
+		for ( int i = network.length - 1 ; i >= 1 ; i-- ) {
+			for ( int j = 0 ; j < network[i].length ; j++ ) {
+				computeNodeDeltaAtLayer( i, j, targets );
+			}
+		}
+	}
+
+	public void computeNodeDeltaAtLayer( int layerIndex, int nodeIndex, double[] targets ) {
 		if ( layerIndex == network.length - 1 ) {
-			computeNodeDeltaAtOutputLayer( nodeIndex );
+			computeNodeDeltaAtOutputLayer( nodeIndex, targets );
 		} else {
 			computeNodeDeltaAtHiddenLayer( layerIndex, nodeIndex );
 		}
 	}
 
 
-	public void computeNodeDeltaAtOutputLayer( int nodeIndex ) {
-		assert( network[network.length - 1].length == actualResults.length );
+	public void computeNodeDeltaAtOutputLayer( int nodeIndex, double[] targets ) {
+		assert( network[network.length - 1].length == targets.length );
 		Neuron node = network[ network.length - 1][nodeIndex];
 		switch (lossFunctionType) {
 			case MSE:
-				node.setDelta( (actualResults[nodeIndex] - node.output()) * node.getAFDerivative() );
+				node.setDelta( 
+					(node.output( weights[network.length - 2][nodeIndex] ) - targets[nodeIndex]) * node.getAFDerivative( weights[network.length - 2][nodeIndex] ) 
+				);
 				break;
 			case CROSS_ENTROPY:
-				node.setDelta( actualResults[nodeIndex] - node.output() );
+				node.setDelta( targets[nodeIndex] - node.output( weights[network.length - 2][nodeIndex] ) );
 				break;
 			default:
 				System.err.println("Error. Undefined loss function");
@@ -212,16 +236,18 @@ public class FullNeuralNetwork {
 
 
 	public void computeNodeDeltaAtHiddenLayer( int layerIndex, int nodeIndex ) {
-		// this layer cannot be the hidden layer
+		// this layer cannot be the output layer
 		assert( layerIndex < network.length - 1 );
 		Neuron node = network[layerIndex][nodeIndex];
+		if ( node instanceof BiasNeuron )
+			return;
 		double sum = 0;
 		Neuron[] nextLayer = network[layerIndex + 1];
 		for ( int i = 0 ; i < nextLayer.length ; i++ ) {
 			Neuron n = nextLayer[i];
-			sum += n.getWeights()[nodeIndex] * n.getDelta();
+			sum += weights[layerIndex][i][nodeIndex] * n.getDelta();
 		}
-		node.setDelta( node.getAFDerivative() * sum );
+		node.setDelta( node.getAFDerivative( weights[layerIndex-1][nodeIndex] ) * sum );
 	}
 
 
@@ -249,11 +275,18 @@ public class FullNeuralNetwork {
 		// every neuron except input neuron must have an array of weights
 		assert( weights.length == network.length - 1 );
 		this.weights = weights;
-		for ( int i = 1 ; i < network.length ; i++ ) {
-			for (int j = 0 ; j < weights[i - 1].length; j++ ) {
-				setWeightsForNeuron(i, j, weights[i - 1][j] );
+	}
+
+
+	public void updateWeights() {
+		// fill in the tempWeights array
+		for ( int i = network.length - 1 ; i >= 1; i-- ) {
+			for ( int j = 0 ; j < network[i].length ; j++ ) {
+				updateWeightsForNode( i, j );
 			}
 		}
+		// set weight array to tempWeights
+		weights = tempWeights;
 	}
 
 
@@ -261,27 +294,34 @@ public class FullNeuralNetwork {
 	 * Update the weight arrays of a node at a specified position.
 	 * <tt>newWeight = oldWeight - weightDelta</tt>
 	 */
-	public void updateWeights( int layerIndex, int nodeIndex ) {
+	public void updateWeightsForNode( int layerIndex, int nodeIndex ) {
 		Neuron node = network[layerIndex][nodeIndex];
-		for ( int i = 0 ; i < node.getWeights().length ; i++ ) {
-			double gradient = node.getDelta() * node.output();
-			double prevWeightDelta = weightDeltas[layerIndex][nodeIndex][i];
-			weightDeltas[layerIndex][nodeIndex][i] = 
-				-learningRate * gradient + momentum * prevWeightDelta;
-			double newWeight = node.getWeights()[i] - weightDeltas[layerIndex][nodeIndex][i];
-			node.setWeights( i, newWeight );
+		if ( node instanceof BiasNeuron ) 
+			return;
+		for ( int i = 0 ; i < weights[layerIndex-1][nodeIndex].length ; i++ ) {
+			Neuron inputNode = network[layerIndex-1][i];
+			double gradient = node.getDelta();
+			if ( inputNode instanceof BiasNeuron ) {
+				continue;
+			}
+			else if ( inputNode instanceof InputNeuron ) {
+				gradient *= ((InputNeuron) inputNode).output();
+			}
+			else {
+				gradient *= inputNode.output( weights[layerIndex-2][i] );
+			}
+			double prevWeightDelta = weightDeltas[layerIndex-1][nodeIndex][i];
+			weightDeltas[layerIndex-1][nodeIndex][i] = 
+				learningRate * gradient + momentum * prevWeightDelta;
+			double newWeight = weights[layerIndex-1][nodeIndex][i] - weightDeltas[layerIndex-1][nodeIndex][i];
+			tempWeights[layerIndex - 1][nodeIndex][i] = newWeight;
+			if ( weights[layerIndex-1][nodeIndex][i] == 0.45 ) {
+				System.out.println("outttt: " + inputNode.output( weights[layerIndex-2][nodeIndex] ));
+				System.out.println( "learning rate " + learningRate );
+				System.out.println( "gradient: " + gradient );
+				System.out.println( "new weight: " + newWeight );
+			}
 		}
-	}
-
-
-	/**
-	 * Set the weights array for a specified neuron in the network.
-	 * @param layerIndex index of the layer that contains the neuron.
-	 * @param index index of the neuron within the layer.
-	 * @param weights the weights array.
-	 */
-	public void setWeightsForNeuron( int layerIndex, int index, double[] weights ) {
-		network[layerIndex][index].setWeights( weights );
 	}
 
 
@@ -295,12 +335,26 @@ public class FullNeuralNetwork {
 	}
 
 
-	public double setLearningRate( double learningRate ) {
+	public void setLearningRate( double learningRate ) {
 		this.learningRate = learningRate;
 	}
 
 
-	public double setMomentum( double momentum ) {
+	public void setMomentum( double momentum ) {
 		this.momentum = momentum;
+	}
+
+	public double[][][] cloneWeights( double[][][] weights ) {
+		double[][][] cloned = new double[ weights.length ][][];
+		for ( int i = 0 ; i < weights.length ; i++ ) {
+			cloned[i] = new double[ weights[i].length ][];
+			for ( int j = 0 ; j < weights[i].length ; j++ ) {
+				cloned[i][j] = new double[ weights[i][j].length ];
+				for ( int k = 0 ; k < weights[i][j].length ; k++ ) {
+					cloned[i][j][k] = weights[i][j][k];
+				}
+			}
+		}
+		return cloned;
 	}
 }

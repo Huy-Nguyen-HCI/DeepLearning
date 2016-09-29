@@ -104,6 +104,7 @@ public class SimulatedAnnealing {
 		return Math.exp( -(Math.abs(currentError - previousError)) / currentTemp );
 	}
 
+
 	public double[][][] cloneWeights( double[][][] weights ) {
 		double[][][] cloned = new double[ weights.length ][][];
 		for ( int i = 0 ; i < weights.length ; i++ ) {
