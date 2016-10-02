@@ -31,20 +31,8 @@ public class Main {
 		// }
 		double[][] inputs = new double[][]{ new double[]{0.05, 0.10} };
 		double[][] targets = new double[][]{ new double[]{0.01, 0.99} };
-		BatchTraining batch = new BatchTraining( example, inputs, targets );
+		Backpropagation batch = new Backpropagation( example, inputs, targets[0] );
 		batch.train();
 	}
 
-
-	public static void printArray(double[] arr) {
-		System.out.println("*****");
-		for ( double x : arr ) System.out.print(x + " ");
-		System.out.println("\n*****");
-	}
-
-
-	public static double getRandomNumberInRange( double start, double end ) {
-		double random = new Random().nextDouble();
-		return start + (random * (end - start));
-	}
 }
