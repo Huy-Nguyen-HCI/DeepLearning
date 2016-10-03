@@ -3,9 +3,9 @@ public class Backpropagation {
 
 	FullNeuralNetwork network;
 	double learningRate = 0.5, momentum = 0;
-	final int numberOfIterations = 1000;
+	final int numberOfIterations = 1000000;
 	double[][] inputs;
-	double[] targets;
+	double[][] targets;
 
 	final int 
 		MSE = 0,
@@ -13,44 +13,58 @@ public class Backpropagation {
 	// types of loss function
 	int lossFunctionType = MSE;
 
-	public Backpropagation( FullNeuralNetwork network, double[][] inputs, double[] targets ) {
+
+	public Backpropagation( FullNeuralNetwork network, double[][] inputs, double[][] targets ) {
 		this.network = network;
 		this.inputs = inputs;
 		this.targets = targets;
 	}
 
 
+
 	public void train() {
-		network.setInputs( inputs[0] );
-		computeNodeDeltas();
-		updateWeights();
-		Neuron[] semiLast = network.getLayer( network.getNumberOfLayers() - 2 );
-		for ( Neuron n : semiLast ) {
-			Utilities.printArray( n.getWeights() );
+		for ( int j = 0 ; j < numberOfIterations ; j++ ) {
+			for ( int i = 0 ; i < inputs.length ; i++ ) {
+				iterate( inputs[i], targets[i] );
+			}
+			displayLoss();
 		}
+		System.out.println("final output is :" );
+		for ( double[] input : inputs ) {
+			network.setInputs( input );
+			Utilities.printArray( network.getOutputs() );
+		}
+
 	}
 
 
-	public void computeNodeDeltas() {
+	public void iterate( double[] inputs, double[] targets ) {
+		network.setInputs( inputs );
+		computeNodeDeltas( targets );
+		updateWeights();
+	}
+
+
+	public void computeNodeDeltas( double[] targets ) {
 		network.getOutputs();
 		for ( int i = network.getNumberOfLayers() - 1 ; i >= 1 ; i-- ) {
 			for ( int j = 0 ; j < network.getLayer(i).length ; j++ ) {
-				computeNodeDeltaAtLayer( i, j );
+				computeNodeDeltaAtLayer( i, j, targets );
 			}
 		}
 	}
 
 
-	public void computeNodeDeltaAtLayer( int layerIndex, int nodeIndex ) {
+	public void computeNodeDeltaAtLayer( int layerIndex, int nodeIndex, double[] targets ) {
 		if ( layerIndex == network.getNumberOfLayers() - 1 ) {
-			computeNodeDeltaAtOutputLayer( nodeIndex);
+			computeNodeDeltaAtOutputLayer( nodeIndex, targets );
 		} else {
 			computeNodeDeltaAtHiddenLayer( layerIndex, nodeIndex );
 		}
 	}
 
 
-	public void computeNodeDeltaAtOutputLayer( int nodeIndex ) {
+	public void computeNodeDeltaAtOutputLayer( int nodeIndex, double[] targets  ) {
 		Neuron node = network.getNode( network.getNumberOfLayers() - 1, nodeIndex );
 		switch (lossFunctionType) {
 			case MSE:
@@ -121,4 +135,17 @@ public class Backpropagation {
 			node.setTempWeight( i, newWeight );
 		}
 	}
+
+
+	public void displayLoss() {
+		double[] out = new double[inputs.length];
+		double[] expected = new double[inputs.length];
+		for ( int i = 0 ; i < inputs.length ; i++ ) {
+			network.setInputs( inputs[i] );
+			out[i] = network.getOutputs()[0];
+			expected[i] = targets[i][0];
+		}
+		System.out.println("loss: " + LossFunction.meanSquareError(out, expected));
+	}
+
 }

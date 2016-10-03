@@ -137,7 +137,7 @@ public class FullNeuralNetwork {
 				n.setWeights( new double[ network[i-1].length] );
 				// set all weights to random initially
 				for ( int k = 0 ; k < network[i-1].length ; k++ ) {
-					n.setWeight( k, Utilities.getRandomNumberInRange(-1, 1) );
+					n.setWeight( k, Utilities.getRandomNumberInRange(-0.5, 0.5) );
 				}
 			}
 		}
