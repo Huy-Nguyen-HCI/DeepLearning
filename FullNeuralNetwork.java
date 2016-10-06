@@ -158,6 +158,15 @@ public class FullNeuralNetwork {
 		}
 	}
 
+
+	public void clearData() {
+		for ( int i = 0 ; i < network.length ; i++ ) {
+			for ( int j = 0 ; j < network[i].length ; j++ ) {
+				network[i][j].clearData();
+			}
+		}
+	}
+
 	/***** GETTER AND SETTER *********/
 
 
@@ -200,8 +209,7 @@ public class FullNeuralNetwork {
 				}
 				n.setWeights( new double[network[i-1].length] );
 				for ( int k = 0 ; k < network[i-1].length ; k++ ) {
-					n.setWeight( k, weights[i-1][j][k] );	
-					n.setTempWeight( k, weights[i-1][j][k] );				
+					n.setWeight( k, weights[i-1][j][k] );				
 				}
 			}
 		}

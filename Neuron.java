@@ -5,9 +5,9 @@ public class Neuron {
 	double[] inputs;
 	double[] weights;
 	double [] weightDeltas;
-	double [] tempWeights;
 	int activationFunctionType = -1;
 	double delta;
+	double[] gradients;
 
 	// types of activation function
 	public static final int
@@ -42,7 +42,7 @@ public class Neuron {
 			case RELU:
 				return ActivationFunctions.reLUAF( evaluateLinearCombination() );
 			default:
-				System.err.println("Error. Undefined activation function");
+				assert false : "Error. Unrecognized activation function.";
 				return -1;
 		}
 	}
@@ -59,16 +59,11 @@ public class Neuron {
 			case RELU:
 				return ActivationFunctions.d_reLUAF( evaluateLinearCombination() );
 			default:
-				System.err.println("Error. Undefined activation function");
+				assert false : "Error. Unrecognized activation function.";
 				return -1;
 		}
 	}
 
-
-	public void updateWeights() {
-		assert( tempWeights != null );
-		weights = tempWeights;
-	}
 
 	/***** GETTER AND SETTER *********/
 	public int getAFType() {
@@ -87,8 +82,9 @@ public class Neuron {
 			weightDeltas = new double[ w.length ];
 			Arrays.fill( weightDeltas, 0);
 		}
-		if ( tempWeights == null ) {
-			tempWeights = new double[ w.length ];
+		if ( gradients == null ) {
+			gradients = new double[ w.length ];
+			Arrays.fill( gradients, 0);
 		}
 	}
 
@@ -128,12 +124,22 @@ public class Neuron {
 	}
 
 
-	public void setTempWeight( int index, double w ) {
-		tempWeights[index] = w;
+	public void setInput( double[] inputs) {
+		this.inputs = inputs;
 	}
 
 
-	public void setInput( double[] inputs) {
-		this.inputs = inputs;
+	public void setGradient( int index, double g ) {
+		gradients[index] = g;
+	}
+
+
+	public double getGradient( int index ) {
+		return gradients[index];
+	}
+
+
+	public void clearData() {
+		delta = 0;
 	}
 }

@@ -2,17 +2,19 @@
 public class Backpropagation {
 
 	FullNeuralNetwork network;
-	double learningRate = 0.5, momentum = 0;
-	final int numberOfIterations = 1000000;
+	double learningRate = 0.2, momentum = 0;
+	final int numberOfIterations = 10000;
 	double[][] inputs;
 	double[][] targets;
 
-	final int 
+	public static final int 
 		MSE = 0,
 		CROSS_ENTROPY = 1;
-	// types of loss function
+	public static final int
+		ONLINE = 0,
+		BATCH = 1,
+		SGD = 2;
 	int lossFunctionType = MSE;
-
 
 	public Backpropagation( FullNeuralNetwork network, double[][] inputs, double[][] targets ) {
 		this.network = network;
@@ -21,12 +23,31 @@ public class Backpropagation {
 	}
 
 
-
-	public void train() {
+	public void onlineTraining() {
 		for ( int j = 0 ; j < numberOfIterations ; j++ ) {
 			for ( int i = 0 ; i < inputs.length ; i++ ) {
 				iterate( inputs[i], targets[i] );
+				updateNodeGradients( ONLINE );
+				updateWeights();
 			}
+			displayLoss();
+			// network.clearData();
+		}
+		System.out.println("final output is :" );
+		for ( double[] input : inputs ) {
+			network.setInputs( input );
+			Utilities.printArray( network.getOutputs() );
+		}
+	}
+
+
+	public void batchTraining() {
+		for ( int j = 0 ; j < numberOfIterations ; j++ ) {
+			for ( int i = 0 ; i < inputs.length ; i++ ) {
+				iterate( inputs[i], targets[i] );
+				updateNodeGradients( BATCH );
+			}
+			updateWeights();
 			displayLoss();
 		}
 		System.out.println("final output is :" );
@@ -34,19 +55,17 @@ public class Backpropagation {
 			network.setInputs( input );
 			Utilities.printArray( network.getOutputs() );
 		}
-
 	}
 
 
 	public void iterate( double[] inputs, double[] targets ) {
 		network.setInputs( inputs );
+		network.getOutputs();
 		computeNodeDeltas( targets );
-		updateWeights();
 	}
 
 
 	public void computeNodeDeltas( double[] targets ) {
-		network.getOutputs();
 		for ( int i = network.getNumberOfLayers() - 1 ; i >= 1 ; i-- ) {
 			for ( int j = 0 ; j < network.getLayer(i).length ; j++ ) {
 				computeNodeDeltaAtLayer( i, j, targets );
@@ -64,7 +83,7 @@ public class Backpropagation {
 	}
 
 
-	public void computeNodeDeltaAtOutputLayer( int nodeIndex, double[] targets  ) {
+	public void computeNodeDeltaAtOutputLayer( int nodeIndex, double[] targets ) {
 		Neuron node = network.getNode( network.getNumberOfLayers() - 1, nodeIndex );
 		switch (lossFunctionType) {
 			case MSE:
@@ -103,14 +122,7 @@ public class Backpropagation {
 			for ( int j = 0 ; j < network.getLayer(i).length ; j++ ) {
 				updateNewWeightsForNode( i, j );
 			}
-		}
-		// after all temp weights are evaluated, update weights
-		for ( int i = network.getNumberOfLayers() - 1 ; i >= 1; i-- ) {
-			for ( int j = 0 ; j < network.getLayer(i).length ; j++ ) {
-				Neuron n = network.getNode( i, j );
-				n.updateWeights();
-			}
-		}
+		}		
 	}
 
 
@@ -124,15 +136,46 @@ public class Backpropagation {
 			return;
 		for ( int i = 0 ; i < node.getWeights().length ; i++ ) {
 			Neuron inputNode = network.getNode( layerIndex - 1, i );
-			double gradient = node.getDelta();
-			if ( inputNode instanceof BiasNeuron ) {
+			if ( inputNode instanceof BiasNeuron ) 
 				continue;
-			}
-			gradient *= inputNode.output();
+			double gradient = node.getGradient(i);
 			double prevWeightDelta = node.getWeightDelta(i);
-			node.setWeightDelta( i, learningRate * gradient + momentum * prevWeightDelta );
+			node.setWeightDelta( i, learningRate * gradient + momentum * prevWeightDelta );			
 			double newWeight = node.getWeight(i) - node.getWeightDelta(i);
-			node.setTempWeight( i, newWeight );
+			node.setWeight( i, newWeight );
+		}
+	}
+
+
+	public void updateNodeGradients( int trainingMode ) {
+		for ( int i = network.getNumberOfLayers() - 1 ; i >= 1; i-- ) {
+			for ( int j = 0 ; j < network.getLayer(i).length ; j++ ) {
+				updateNodeGradient( i, j, trainingMode );
+			}
+		}	
+	}
+
+
+	public void updateNodeGradient( int layerIndex, int nodeIndex, int trainingMode ) {
+		Neuron node = network.getNode( layerIndex, nodeIndex );	
+		if ( node instanceof BiasNeuron ) return;			
+		switch ( trainingMode ) {
+			case ONLINE:
+				for ( int i = 0 ; i < node.getWeights().length ; i++ ) {
+					Neuron inputNode = network.getNode( layerIndex - 1, i );
+					double gradient = node.getDelta() * inputNode.output();
+					node.setGradient( i, gradient );
+				}
+				break;
+			case BATCH:
+				for ( int i = 0 ; i < node.getWeights().length ; i++ ) {
+					Neuron inputNode = network.getNode( layerIndex - 1, i );
+					double gradient = node.getDelta() * inputNode.output();
+					node.setGradient( i, node.getGradient(i) + gradient );
+				}
+				break;
+			default:
+				assert false : "Error. Unrecognized training mode.";
 		}
 	}
 

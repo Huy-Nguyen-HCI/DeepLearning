@@ -21,14 +21,13 @@ public class Main {
 		// 		}
 		// 	}
 		// );
-		// example.setInputs( new double[]{0.05, 0.10} );
-		// double[] targets = new double[]{0.01, 0.99};
-		// example.computeNodeDeltas( targets );
-		// example.updateWeights();
-		// System.out.println( "new w5 and w6" );
-		// for ( int i = 0 ; i < example.weights[example.network.length-2].length; i++ ) {
-		// 	printArray( example.weights[example.network.length-2][i] );
-		// }
+		// double[][] inputs = new double[][]{new double[]{0.05, 0.10}};
+		// double[][] targets = new double[][]{new double[]{0.01, 0.99}};
+		// Backpropagation batch = new Backpropagation( example, inputs, targets );
+		// batch.onlineTraining();
+		// System.out.println( "output layer weights" );
+		// Utilities.printArray( example.network[2][0].getWeights() );
+		// Utilities.printArray( example.network[2][1].getWeights() );
 		double[][] inputs = new double[][]{ 
 			new double[]{1,1},
 			new double[]{1,0},
@@ -41,9 +40,8 @@ public class Main {
 			new double[]{1},
 			new double[]{0}
 		};
-		// double[] targets = new double[]{0,1,1,0};
 		Backpropagation batch = new Backpropagation( example, inputs, targets );
-		batch.train();
+		batch.batchTraining();
 	}
 
 }
