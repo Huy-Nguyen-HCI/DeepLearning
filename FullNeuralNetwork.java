@@ -215,4 +215,19 @@ public class FullNeuralNetwork {
 		}
 	}
 
+
+	// public void printNodes() {
+	// 	for ( int i = 1 ; i < network.length ; i++ ) {
+	// 		for ( int j = 0 ; j < network[i].length ; j++ ) {
+	// 			Neuron n = network[i][j];
+	// 			if (n instanceof BiasNeuron) continue;
+	// 			System.out.println("W of neuron at (" + i + ", " + j + ") is: ");
+	// 			Utilities.printArray( network[i][j].weights );
+	// 			// System.out.println( n.getDelta() );
+	// 			// System.out.println("Inputs of neuron at (" + i + ", " + j + ") is: ");
+	// 			// n.printLinearComb();
+	// 		}
+	// 	}
+	// }
+
 }

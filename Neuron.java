@@ -8,6 +8,7 @@ public class Neuron {
 	int activationFunctionType = -1;
 	double delta;
 	double[] gradients;
+	double output;
 
 	// types of activation function
 	public static final int
@@ -32,19 +33,25 @@ public class Neuron {
 		// todo. save output to a variable
 		switch ( activationFunctionType ) {
 			case LINEAR:
-				return ActivationFunctions.linearAF( evaluateLinearCombination() );
+				output = ActivationFunctions.linearAF( evaluateLinearCombination() );
+				break;
 			case STEP:
-				return ActivationFunctions.stepAF( evaluateLinearCombination() );
+				output = ActivationFunctions.stepAF( evaluateLinearCombination() );
+				break;
 			case SIGMOID:
-				return ActivationFunctions.sigmoidAF( evaluateLinearCombination() );
+				output = ActivationFunctions.sigmoidAF( evaluateLinearCombination() );
+				break;
 			case HYPERBOLIC:
-				return ActivationFunctions.hyperbolicAF( evaluateLinearCombination() );
+				output = ActivationFunctions.hyperbolicAF( evaluateLinearCombination() );
+				break;
 			case RELU:
-				return ActivationFunctions.reLUAF( evaluateLinearCombination() );
+				output = ActivationFunctions.reLUAF( evaluateLinearCombination() );
+				break;
 			default:
 				assert false : "Error. Unrecognized activation function.";
-				return -1;
+				break;
 		}
+		return output;
 	}
 
 
@@ -141,5 +148,15 @@ public class Neuron {
 
 	public void clearData() {
 		delta = 0;
+		if ( gradients != null ) 
+			Arrays.fill( gradients, 0 );
+	}
+
+
+	public void printLinearComb() {
+		System.out.println("linear :");
+		Utilities.printArray( inputs );
+		System.out.println("weights:");
+		Utilities.printArray( weights );
 	}
 }

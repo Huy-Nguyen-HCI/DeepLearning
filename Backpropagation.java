@@ -2,7 +2,7 @@
 public class Backpropagation {
 
 	FullNeuralNetwork network;
-	double learningRate = 0.2, momentum = 0;
+	double learningRate = 0.7, momentum = 0;
 	final int numberOfIterations = 10000;
 	double[][] inputs;
 	double[][] targets;
@@ -29,9 +29,8 @@ public class Backpropagation {
 				iterate( inputs[i], targets[i] );
 				updateNodeGradients( ONLINE );
 				updateWeights();
+				network.clearData();
 			}
-			displayLoss();
-			// network.clearData();
 		}
 		System.out.println("final output is :" );
 		for ( double[] input : inputs ) {
@@ -48,7 +47,7 @@ public class Backpropagation {
 				updateNodeGradients( BATCH );
 			}
 			updateWeights();
-			displayLoss();
+			network.clearData();
 		}
 		System.out.println("final output is :" );
 		for ( double[] input : inputs ) {
@@ -88,8 +87,8 @@ public class Backpropagation {
 		switch (lossFunctionType) {
 			case MSE:
 				node.setDelta( 
-					(node.output() - targets[nodeIndex]) * node.getAFDerivative() 
-				);
+					(targets[nodeIndex] - node.output()) * node.getAFDerivative() 
+				);				
 				break;
 			case CROSS_ENTROPY:
 				node.setDelta( targets[nodeIndex] - node.output() );
@@ -104,8 +103,6 @@ public class Backpropagation {
 		// this layer cannot be the output layer
 		assert( layerIndex < network.getNumberOfLayers() - 1 );
 		Neuron node = network.getNode( layerIndex, nodeIndex );
-		if ( node instanceof BiasNeuron )
-			return;
 		double sum = 0;
 		Neuron[] nextLayer = network.getLayer( layerIndex + 1 );
 		for ( int i = 0 ; i < nextLayer.length ; i++ ) {
@@ -136,12 +133,10 @@ public class Backpropagation {
 			return;
 		for ( int i = 0 ; i < node.getWeights().length ; i++ ) {
 			Neuron inputNode = network.getNode( layerIndex - 1, i );
-			if ( inputNode instanceof BiasNeuron ) 
-				continue;
 			double gradient = node.getGradient(i);
 			double prevWeightDelta = node.getWeightDelta(i);
 			node.setWeightDelta( i, learningRate * gradient + momentum * prevWeightDelta );			
-			double newWeight = node.getWeight(i) - node.getWeightDelta(i);
+			double newWeight = node.getWeight(i) + node.getWeightDelta(i);
 			node.setWeight( i, newWeight );
 		}
 	}
@@ -178,17 +173,4 @@ public class Backpropagation {
 				assert false : "Error. Unrecognized training mode.";
 		}
 	}
-
-
-	public void displayLoss() {
-		double[] out = new double[inputs.length];
-		double[] expected = new double[inputs.length];
-		for ( int i = 0 ; i < inputs.length ; i++ ) {
-			network.setInputs( inputs[i] );
-			out[i] = network.getOutputs()[0];
-			expected[i] = targets[i][0];
-		}
-		System.out.println("loss: " + LossFunction.meanSquareError(out, expected));
-	}
-
 }
