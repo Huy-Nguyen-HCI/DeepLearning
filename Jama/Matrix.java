@@ -10,7 +10,7 @@ import java.io.BufferedReader;
 import java.io.StreamTokenizer;
 import Jama.util.*;
 
-/**
+/***
    Jama = Java Matrix class.
 <P>
    The Java Matrix Class provides the fundamental operations of numerical
