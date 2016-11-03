@@ -1,4 +1,5 @@
 import java.util.*;
+import jama.Matrix;
 
 public class Utilities {
 
@@ -36,5 +37,12 @@ public class Utilities {
 	public static double getRandomNumberInRange( double start, double end ) {
 		double random = new Random().nextDouble();
 		return start + (random * (end - start));
+	}
+
+
+	public static Matrix create3DBias( double value ) {
+		Matrix[] bias = new Matrix[1];
+		bias[0] = new Matrix( new double[][]{new double[]{value}} );
+		return bias;
 	}
 }

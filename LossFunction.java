@@ -1,5 +1,7 @@
 public class LossFunction {
 
+	public static final int MSE = 0, LOG_LOSS = 1;
+	
 	public static double logLoss( double[] predicted, double[] actual ) {
 		assert( predicted.length == actual.length );
 		int n = predicted.length;

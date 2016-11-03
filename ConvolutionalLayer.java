@@ -5,11 +5,16 @@ import Jama.Matrix;
  */
 public class ConvolutionalLayer extends Layer {
 
+	// filter parameters
 	Matrix[] filters;
-	int stride;
-	int padding;
-	int filterSize;
+	int stride; // number of steps to take for next scan
+	int padding; // additional rows and layers 
+	int filterSize; // size of filter
+
+	// backpropagation info
 	Matrix[] output;
+	double[][] delta;
+	double[][][] gradients;
 
 	/**
 	* Take a 3D matrix as input.
@@ -37,19 +42,22 @@ public class ConvolutionalLayer extends Layer {
 
 	public Matrix[] getOutput() {
 		// each filter produces one 2D output
+		int inputWidth = input[0].getRowDimension();
+		int inputHeight = input[0].getColumnDimension();
+
 		Matrix[] output = new Matrix[filters.length];
 
-		int outputSize = input.getRowDimension() - filters[0].length + 1;
+		int outputSize = inputWidth - filters[0].length + 1;
 		for ( int k = 0 ; k < output.length ; k++ ) {
 			Matrix filter = filter[k];
 			output[k] = new Matrix(outputSize,outputSize);
-			for ( int i = 0 ; i < outputSize ; i++ ) {
-				for ( int j = 0 ; j < outputSize ; j++ ) {
+			for ( int i = filterSize / 2 ; i <= inputWidth - filterSize / 2 ; i+= stride ) {
+				for ( int j = filterSize / 2 ; j <= inputHeight - filterSize / 2 ; j+= stride ) {
 					Matrix mappedRegion = input[k].getMatrix( 
-						i, 
-						i + filterSize - 1, 
-						j, 
-						j + filterSize - 1 
+						i - filterSize / 2, 
+						i + filterSize / 2, 
+						j - filterSize / 2, 
+						j + filterSize / 2 
 					);
 					double linearCombination = sum( mappedRegion.arrayTimes( filter ) );
 					output[k][i][j] = ActivationFunctions.applyActivationFunction( activationFunction, linearCombination );
@@ -60,26 +68,23 @@ public class ConvolutionalLayer extends Layer {
 		return output;
 	}
 
-
-
-	/**
-	 * Return the padding p such that steps = (w - f + 2p) / (s+1) is an integer
-	 * @param w width of the input image
-	 * @return the value of p.
-	 */
-	private int getPadding( int w ) {
-		return Math.abs(2p - f) % (s + 1);
+	public void computeNodeDelta() {
+		for ( int i = filterSize / 2 ; i <= inputWidth - filterSize / 2 ; i+= stride ) {
+			for ( int j = filterSize / 2 ; j <= inputHeight - filterSize / 2 ; j+= stride ) {
+				Matrix neuron = output.getMatrix( 
+					i - filterSize / 2, 
+					i + filterSize / 2, 
+					j - filterSize / 2, 
+					j + filterSize / 2 
+				);
+				
+			}
+		}
 	}
 
 
-	/**
-	 * Get the number of steps needed for each filter to scan through one row
-	 * @param w width of the input image
-	 * @return (w - f + 2p) / (s+1)
-	 */
-	public int getNumberOfSteps( int w ) {
-		int p = getPadding( w );
-		int f = filters[0].getRowDimension();
-		return ( w - f + 2*p ) / (stride + 1);
+	public void clearData() {
+		output = null;
+		delta = new double[delta.length][delta[0].length];
 	}
 }
