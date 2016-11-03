@@ -473,6 +473,19 @@ public class Matrix implements Cloneable, java.io.Serializable {
       return X;
    }
 
+   /** Sum of all elements in matrix 
+    * @return sum
+    */
+   public double sum () {
+      double sum = 0;
+      for ( int i = 0 ; i < m ; i++ ) {
+         for ( int j = 0 ; j < n ; j++ ) {
+            sum += A[i,j];
+         }
+      }
+      return sum;
+   }
+
    /** One norm
    @return    maximum column sum.
    */

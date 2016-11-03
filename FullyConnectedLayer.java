@@ -4,7 +4,15 @@ import Jama.Matrix;
  */
 public class FullyConnectedLayer extends Layer {
 
-	public FullyConnectedLayer( int activationFunction ) {
+	int neuronCount;
+
+	public FullyConnectedLayer( int neuronCount, int activationFunction ) {
 		super( activationFunction );
+		this.neuronCount = neuronCount;
+	}
+
+
+	public double output() {
+		
 	}
 }

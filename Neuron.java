@@ -10,15 +10,6 @@ public class Neuron {
 	double[] gradients;
 	double output;
 
-	// types of activation function
-	public static final int
-		LINEAR = 0,
-		STEP = 1,
-		SIGMOID = 2,
-		HYPERBOLIC = 3,
-		RELU = 4,
-		SOFTMAX = 5;
-
 
 	public double evaluateLinearCombination() {
 		double linearCombination = 0;
@@ -30,27 +21,8 @@ public class Neuron {
 
 
 	public double output() {
-		// todo. save output to a variable
-		switch ( activationFunctionType ) {
-			case LINEAR:
-				output = ActivationFunctions.linearAF( evaluateLinearCombination() );
-				break;
-			case STEP:
-				output = ActivationFunctions.stepAF( evaluateLinearCombination() );
-				break;
-			case SIGMOID:
-				output = ActivationFunctions.sigmoidAF( evaluateLinearCombination() );
-				break;
-			case HYPERBOLIC:
-				output = ActivationFunctions.hyperbolicAF( evaluateLinearCombination() );
-				break;
-			case RELU:
-				output = ActivationFunctions.reLUAF( evaluateLinearCombination() );
-				break;
-			default:
-				assert false : "Error. Unrecognized activation function.";
-				break;
-		}
+		return ActivationFunctions.applyActivationFunction( activationFunctionType, evaluateLinearCombination() );
+		// todo. save output to a variable		
 		return output;
 	}
 

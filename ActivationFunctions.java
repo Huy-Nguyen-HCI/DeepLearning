@@ -2,6 +2,15 @@ import java.util.ArrayList;
 
 public class ActivationFunctions {
 
+	// types of activation function
+	public static final int
+		LINEAR = 0,
+		STEP = 1,
+		SIGMOID = 2,
+		HYPERBOLIC = 3,
+		RELU = 4,
+		SOFTMAX = 5;
+
 	/**
 	 * Linear activation function used for regression neural networks.
 	 * @param x the input value from the program or previous layer.
@@ -101,6 +110,25 @@ public class ActivationFunctions {
 	 */
 	public static double singleInputNeuralNetwork( double x, double weight, double bias ) {
 		return sigmoidAF( weight * x + bias );
+	}
+
+
+	public static double applyActivationFunction( int activationFunctionType, double input ) {		
+		switch ( activationFunctionType ) {
+			case LINEAR:
+				return ActivationFunctions.linearAF( input );
+			case STEP:
+				return ActivationFunctions.stepAF( input );
+			case SIGMOID:
+				return ActivationFunctions.sigmoidAF( input );
+			case HYPERBOLIC:
+				return ActivationFunctions.hyperbolicAF( input );
+			case RELU:
+				return ActivationFunctions.reLUAF( input );
+			default:
+				assert false : "Error. Unrecognized activation function.";
+				return -1;
+		}
 	}
 
 }

@@ -8,6 +8,7 @@ public class Layer {
 
 	Matrix input;
 	int activationFunction;
+	Matrix output;
 
 	public Layer( int activationFunction ) {
 		this.activationFunction = activationFunction;
@@ -20,6 +21,6 @@ public class Layer {
 
 
 	public Matrix getOutput() {
-		return input;
+		return (output == null) ? input : output;
 	}
 }
