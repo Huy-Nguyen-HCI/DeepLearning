@@ -8,7 +8,6 @@ public class ConvolutionalLayer extends Layer {
 	// filter parameters
 	Matrix[] filters;
 	int stride; // number of steps to take for next scan
-	int padding; // additional rows and layers 
 	int filterSize; // size of filter
 
 	// backpropagation info
@@ -34,9 +33,23 @@ public class ConvolutionalLayer extends Layer {
 		for ( int i = 0 ; i < numberOfFilters ; i++ ) {
 			filters = new Matrix[filterSize][filterSize];
 		}
-
-		this.padding = padding;
 		this.stride = stride;
+		padInput( padding );
+	}
+
+
+	public void padInput( int padding ) {
+		for ( int k = 0 ; k < input.length ; k++ ) {
+			Matrix padded = new Matrix( input[k].getRowDimension() + padding , input[k].getColumnDimension() + padding );
+			int m = padded.getRowDimension();
+			int n = padded.getColumnDimension();
+			for ( int i = 0 ; i < m ; i++ ) {
+				for ( int j = 0 ; j < n ; j++ ) {
+					padded.set( i, j, (i >= padding && i < m - padding) ? input[k].get(i-m,j-m) : 0);
+				}
+			}
+			input[k] = padded;
+		}		
 	}
 
 
@@ -46,13 +59,13 @@ public class ConvolutionalLayer extends Layer {
 		int inputHeight = input[0].getColumnDimension();
 
 		Matrix[] output = new Matrix[filters.length];
-
 		int outputSize = inputWidth - filters[0].length + 1;
-		for ( int k = 0 ; k < output.length ; k++ ) {
+
+		for ( int k = 0 ; k < filters.length ; k++ ) {
 			Matrix filter = filter[k];
-			output[k] = new Matrix(outputSize,outputSize);
-			for ( int i = filterSize / 2 ; i <= inputWidth - filterSize / 2 ; i+= stride ) {
-				for ( int j = filterSize / 2 ; j <= inputHeight - filterSize / 2 ; j+= stride ) {
+			output[k] = new Matrix( outputSize, outputSize );
+			for ( int i = filterSize / 2 ; i < inputWidth - filterSize / 2 ; i+= stride ) {
+				for ( int j = filterSize / 2 ; j < inputHeight - filterSize / 2 ; j+= stride ) {
 					Matrix mappedRegion = input[k].getMatrix( 
 						i - filterSize / 2, 
 						i + filterSize / 2, 
@@ -67,6 +80,7 @@ public class ConvolutionalLayer extends Layer {
 		this.output = output;
 		return output;
 	}
+	
 
 	public void computeNodeDelta() {
 		for ( int i = filterSize / 2 ; i <= inputWidth - filterSize / 2 ; i+= stride ) {
@@ -85,6 +99,6 @@ public class ConvolutionalLayer extends Layer {
 
 	public void clearData() {
 		output = null;
-		delta = new double[delta.length][delta[0].length];
+		delta = new Matrix( delta.getRowDimension(), delta.getColumnDimension() );
 	}
 }
