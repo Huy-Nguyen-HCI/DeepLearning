@@ -11,17 +11,17 @@ public class ConvolutionalNeuralNetwork {
 	int lossFunctionType = LossFunction.MSE;
 	Layer[] layers;
 
-	public ConvolutionalNeuralNetwork( int[] layerTypes, int[] activationFunctionTypes, double[] bias ) 
-	{
-		// initialize the layers
-		layers = new Layer[ layerTypes.length ];
-		for ( int i = 0 ; i < layers.length ; i++ ) {
-			switch layerTypes[i] {
-				case CONVOLUTIONAL:
-					layers[i] = new ConvolutionalLayer()
-			}
-		}
-	}
+	// public ConvolutionalNeuralNetwork( int[] layerTypes, int[] activationFunctionTypes, double[] bias ) 
+	// {
+	// 	// initialize the layers
+	// 	layers = new Layer[ layerTypes.length ];
+	// 	for ( int i = 0 ; i < layers.length ; i++ ) {
+	// 		switch layerTypes[i] {
+	// 			case CONVOLUTIONAL:
+	// 				layers[i] = new ConvolutionalLayer()
+	// 		}
+	// 	}
+	// }
 
 
 	public void forwardPropagation() {

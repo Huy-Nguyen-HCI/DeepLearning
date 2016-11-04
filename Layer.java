@@ -1,5 +1,4 @@
 import Jama.Matrix;
-import Jama.Matrix;
 
 /**
  * Class that represents a neuron layer in a neural network.

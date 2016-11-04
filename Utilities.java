@@ -1,5 +1,5 @@
 import java.util.*;
-import jama.Matrix;
+import Jama.Matrix;
 
 public class Utilities {
 

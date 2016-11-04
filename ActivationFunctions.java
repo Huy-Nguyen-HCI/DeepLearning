@@ -131,4 +131,23 @@ public class ActivationFunctions {
 		}
 	}
 
+
+	public static double applyActivationFunctionDerivative( int activationFunctionType, double input ) {
+		switch ( activationFunctionType ) {
+			case LINEAR:
+				return ActivationFunctions.d_linearAF( input );
+			case STEP:
+				return ActivationFunctions.d_stepAF( input );
+			case SIGMOID:
+				return ActivationFunctions.d_sigmoidAF( input );
+			case HYPERBOLIC:
+				return ActivationFunctions.d_hyperbolicAF( input );
+			case RELU:
+				return ActivationFunctions.d_reLUAF( input );
+			default:
+				assert false : "Error. Unrecognized activation function.";
+				return -1;
+		}
+	}
+
 }
