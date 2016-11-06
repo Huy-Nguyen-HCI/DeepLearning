@@ -6,7 +6,7 @@ public class Main {
 	public static void main( String[] args ) {
 		FullNeuralNetwork example =  new FullNeuralNetwork(
 			new int[]{2,2,1},
-			new int[]{Neuron.SIGMOID, Neuron.SIGMOID},
+			new int[]{ActivationFunctions.SIGMOID, ActivationFunctions.SIGMOID},
 			new double[]{1,1}
 		);
 		double[][] inputs = new double[][]{ 

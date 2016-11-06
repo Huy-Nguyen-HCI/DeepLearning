@@ -5,21 +5,21 @@ import Jama.Matrix;
  */
 public class Layer {
 
-	Matrix input;
+	Matrix[] input;
 	int activationFunction;
-	Matrix output;
+	Matrix[] output;
 
 	public Layer( int activationFunction ) {
 		this.activationFunction = activationFunction;
 	}
 
 	
-	public void setInput( Matrix input ) {
+	public void setInput( Matrix[] input ) {
 		this.input = input;
 	}	
 
 
-	public Matrix getOutput() {
+	public Matrix[] getOutput() {
 		return (output == null) ? input : output;
 	}
 }

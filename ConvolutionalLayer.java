@@ -4,39 +4,26 @@ import Jama.Matrix;
  * Class that represents a convolutional layer in a convolutional neural network.
  */
 public class ConvolutionalLayer extends Layer {
-
+	
+	final int FILTER_DEPTH = 3;
+	
 	// filter parameters
-	Matrix[] filters;
+	Filter[] filters;
 	int stride; // number of steps to take for next scan
 	int filterSize; // size of filter
 
 	// backpropagation info
 	Matrix[] linearCombinations;
-	Matrix[] gradients;
 	Matrix[] error;
 
 	/**
 	* Take a 3D matrix as input.
 	*/
-	public ConvolutionalLayer(
-		int numberOfFilters,
-		int filterSize,
-		int stride,
-		int padding,
-		int activationFunctionType
-	) {
+	public ConvolutionalLayer(int numberOfFilters, int filterSize, int stride, int padding, int activationFunctionType){
 		super( activationFunctionType );
-
 		this.filterSize = filterSize;
-		// initialize the matrices
-		filters = new Matrix[filterSize];
-		for ( int i = 0 ; i < numberOfFilters ; i++ ) {
-			filters = new Matrix[filterSize][filterSize];
-		}
-
-		linearCombinations = new Matrix[filters.length];
-		gradients = new Matrix[filers.length];
-
+		filters = new Filter[numberOfFilters];
+		linearCombinations = new Matrix[numberOfFilters];
 		this.stride = stride;
 		padInput( padding );
 	}
@@ -60,23 +47,9 @@ public class ConvolutionalLayer extends Layer {
 
 	public void computeLinearCombinations() {
 		// each filter produces one 2D output
-		int inputWidth = input[0].getRowDimension();
-		int inputHeight = input[0].getColumnDimension();
-		int outputSize = (inputWidth - filters[0].length) / stride + 1;
 		for ( int k = 0 ; k < filters.length ; k++ ) {
-			Matrix filter = filter[k];
-			linearCombinations[k] = new Matrix( outputSize, outputSize );
-			for ( int i = filterSize / 2 ; i < inputWidth - filterSize / 2 ; i+= stride ) {
-				for ( int j = filterSize / 2 ; j < inputHeight - filterSize / 2 ; j+= stride ) {
-					Matrix mappedRegion = input[k].getMatrix( 
-						i - filterSize / 2, 
-						i + filterSize / 2, 
-						j - filterSize / 2, 
-						j + filterSize / 2 
-					);
-					linearCombinations[k][i][j] = sum( mappedRegion.arrayTimes( filter ) );
-				}
-			}
+			Filter filter = filters[k];
+			linearCombinations[k] = filter.computeLinearCombination( input, stride );
 		}
 	}
 

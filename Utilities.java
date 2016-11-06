@@ -40,7 +40,7 @@ public class Utilities {
 	}
 
 
-	public static Matrix create3DBias( double value ) {
+	public static Matrix[] create3DBias( double value ) {
 		Matrix[] bias = new Matrix[1];
 		bias[0] = new Matrix( new double[][]{new double[]{value}} );
 		return bias;
