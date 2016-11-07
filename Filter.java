@@ -22,12 +22,13 @@ public class Filter {
 
     public Matrix computeLinearCombination( Matrix[] input, int stride ) {
         assert input.length == FILTER_DEPTH : "Input must have size K x K x 3";
-        int input2DWidth = input[0].getRowDimension();
-        int numberOfSteps = (input2DWidth - filterSize) / stride + 1;
+        int input2DSize = input[0].getRowDimension();
+        int numberOfSteps = (input2DSize - filterSize) / stride + 1;
         Matrix output2DBoard = new Matrix(numberOfSteps, numberOfSteps);
         for ( int i = 0 ; i < numberOfSteps ; i++ ) {
             for ( int j = 0 ; j < numberOfSteps ; j++ ) {
                 double linearCombinationSum = 0;
+                // get one 2D slice of the input
                 for ( int k = 0 ; k < input.length ; k++ ) {
                     Matrix mappedRegion = input[k].getMatrix(
                             stride * i,
@@ -35,6 +36,7 @@ public class Filter {
                             stride * j,
                             stride * j + filterSize
                     );
+                    // weights[k] gets mapped to a region in input[k]
                     linearCombinationSum += mappedRegion.arrayTimes(weights[k]).sum();
                 }
                 output2DBoard.set( i, j, linearCombinationSum );
