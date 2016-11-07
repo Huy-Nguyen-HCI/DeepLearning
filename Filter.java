@@ -12,8 +12,10 @@ public class Filter {
     public Filter( int filterSize ) {
         this.filterSize = filterSize;
         weights = new Matrix[FILTER_DEPTH];
+        gradients = new Matrix[FILTER_DEPTH];
         for ( int i = 0 ; i < FILTER_DEPTH ; i++ ) {
             weights[i] = new Matrix(filterSize, filterSize);
+            gradients[i] = new Matrix(filterSize, filterSize);
         }
     }
 
@@ -41,29 +43,40 @@ public class Filter {
     }
 
 
-    public void computeGradient( Matrix[] input, Matrix[] error, Matrix[] linearCombinations ) {
+    public void computeGradient( Matrix[] input, Matrix[] error, Matrix[] linearCombinations, int stride ) {
         for ( int depth = 0 ; depth < FILTER_DEPTH ; depth ++ ) {
             Matrix filterSlice = weights[depth];
-            Matrix imageSlice = input[depth];
+            Matrix inputSlice = input[depth];
             Matrix errorSlice = error[depth];
             Matrix linearSlice = linearCombinations[depth];
-
+            Matrix gradientSlice = gradients[depth];
+            computeGradientAtSlice( filterSlice, inputSlice, errorSlice, linearSlice, gradientSlice, stride);
         }
     }
 
 
-    public void computeGradientAtSlice( Matrix filterSlice, Matrix inputSlice, Matrix errorSlice, Matrix linearSlice ) {
+    public void computeGradientAtSlice(
+            Matrix filterSlice, Matrix inputSlice,
+            Matrix errorSlice, Matrix linearSlice,
+            Matrix gradientSlice, int stride )
+    {
         for ( int a = 0 ; a < filterSlice.getRowDimension() ; a++ ) {
             for ( int b = 0 ; b < filterSlice.getColumnDimension() ; b++ ) {
                 // calculating gradient at weight (a,b)
                 // loop through all neurons that are connected to this weight
-                for ( int i = 0 ; a + i*stride < inputSlice.getRowDimension() ; i++ ) {
-                    for ( int j = 0 ; b + j*stride < inputSlice.getColumnDimension() ; j++ ) {
-                        gradients[k].get(i,j) += computeNodeDelta(k,i,j) * input[k].get(i+a,j+b);
+                for ( int i = a ; a + i*stride < inputSlice.getRowDimension() ; i++ ) {
+                    for ( int j = b ; b + j*stride < inputSlice.getColumnDimension() ; j++ ) {
+                        double addition = computeNodeDelta(i, j, errorSlice, linearSlice) * inputSlice.get(i+a,j+b);
+                        gradientSlice.set(i, j, gradientSlice.get(i,j) + addition);
                     }
                 }
             }
         }
+    }
+
+
+    public double computeNodeDelta( int nodeX, int nodeY, Matrix errorSlice, Matrix linearSlice ) {
+        return errorSlice.get(nodeX, nodeY) * ActivationFunctions.applyActivationFunctionDerivative( linearSlice.get(nodeX, nodeY);
     }
 
 }

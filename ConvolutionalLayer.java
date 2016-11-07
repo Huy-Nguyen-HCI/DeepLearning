@@ -15,6 +15,7 @@ public class ConvolutionalLayer extends Layer {
 	// backpropagation info
 	Matrix[] linearCombinations;
 	Matrix[] error;
+    Matrix[] delta;
 
 	/**
 	* Take a 3D matrix as input.
@@ -56,31 +57,8 @@ public class ConvolutionalLayer extends Layer {
 
 	public void computeGradients() {
 		for ( int k = 0 ; k < filters.length ; k++ ) {
-			Filter filter3D = filters[k];
-			filter3D.
+			filters[k].computeGradient( input, error, linearCombinations, stride );
 		}
-	}
-
-	public void computeGradients() {
-		for ( int k = 0 ; k < filters.length ; k++ ) {
-			for ( int a = 0 ; a < filters[k].getRowDimension() ; a++ ) {
-				for ( int b = 0 ; b < filters[k].getColumnDimension() ; b++ ) {					
-					Matrix filter = filters[k];
-					Matrix inputSlice = input[k];
-					// weight at [a,b] connects to all neurons at (a+i*stride,b+j*stride)
-					for ( int i = 0 ; a + i*stride < input[k].getRowDimension() ; i++ ) {
-						for ( int j = 0 ; b + j*stride < input[k].getColumnDimension() ; j++ ) {
-							gradients[k].get(i,j) += computeNodeDelta(k,i,j) * input[k].get(i+a,j+b);
-						}
-					}
-				}
-			}
-		}
-	}
-
-
-	public double computeNodeDelta( int depth, int x, int y ) {
-		return error[depth].get(x,y) * ActivationFunctions.applyActivationFunctionDerivative( linearCombinations[depth] );
 	}
 
 
@@ -90,16 +68,28 @@ public class ConvolutionalLayer extends Layer {
 
 
 	public Matrix[] propagateError() {
-		return null;
+        Matrix[] error = new Matrix[Filter.FILTER_DEPTH];
+        for ( int depth = 0 ; depth < FILTER_DEPTH ; depth++ ) {
+            Matrix errorSlice = error[depth];
+            for ( int i = 0 ; i < input[depth].getRowDimension() ; i++ ) {
+                for ( int j = 0 ; j < input[depth].getColumnDimension() ; j++ ) {
+                    // calculate error at neuron (i,j) at input[depth]
+                    double err = 0;
+                    for ( int a = 0 ; a < filterSize ; a++ ) {
+                        for ( int b = 0 ; b < filterSize ; b++ ) {
+                            err +=
+                        }
+                    }
+                }
+            }
+        }
+        return error;
 	}
 
 
 	public double getError( Matrix[] error ) {
-		this.error = error;
+        this.error = error;
+
 	}
 
-
-	public void clearData() {
-		delta = new Matrix( delta.getRowDimension(), delta.getColumnDimension() );
-	}
 }
