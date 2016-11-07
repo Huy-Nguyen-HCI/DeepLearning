@@ -43,21 +43,20 @@ public class Filter {
     }
 
 
-    public void computeGradient( Matrix[] input, Matrix[] error, Matrix[] linearCombinations, int stride ) {
+    public void computeGradient( Matrix[] input, Matrix[] delta, int stride ) {
         for ( int depth = 0 ; depth < FILTER_DEPTH ; depth ++ ) {
             Matrix filterSlice = weights[depth];
             Matrix inputSlice = input[depth];
-            Matrix errorSlice = error[depth];
-            Matrix linearSlice = linearCombinations[depth];
+            Matrix deltaSlice = delta[depth];
             Matrix gradientSlice = gradients[depth];
-            computeGradientAtSlice( filterSlice, inputSlice, errorSlice, linearSlice, gradientSlice, stride);
+            computeGradientAtSlice( filterSlice, inputSlice, deltaSlice, gradientSlice, stride);
         }
     }
 
 
     public void computeGradientAtSlice(
             Matrix filterSlice, Matrix inputSlice,
-            Matrix errorSlice, Matrix linearSlice,
+            Matrix deltaSlice,
             Matrix gradientSlice, int stride )
     {
         for ( int a = 0 ; a < filterSlice.getRowDimension() ; a++ ) {
@@ -66,17 +65,11 @@ public class Filter {
                 // loop through all neurons that are connected to this weight
                 for ( int i = a ; a + i*stride < inputSlice.getRowDimension() ; i++ ) {
                     for ( int j = b ; b + j*stride < inputSlice.getColumnDimension() ; j++ ) {
-                        double addition = computeNodeDelta(i, j, errorSlice, linearSlice) * inputSlice.get(i+a,j+b);
+                        double addition = deltaSlice.get(i,j) * inputSlice.get(i+a,j+b);
                         gradientSlice.set(i, j, gradientSlice.get(i,j) + addition);
                     }
                 }
             }
         }
     }
-
-
-    public double computeNodeDelta( int nodeX, int nodeY, Matrix errorSlice, Matrix linearSlice ) {
-        return errorSlice.get(nodeX, nodeY) * ActivationFunctions.applyActivationFunctionDerivative( linearSlice.get(nodeX, nodeY);
-    }
-
 }

@@ -14,7 +14,6 @@ public class ConvolutionalLayer extends Layer {
 
 	// backpropagation info
 	Matrix[] linearCombinations;
-	Matrix[] error;
     Matrix[] delta;
 
 	/**
@@ -57,7 +56,7 @@ public class ConvolutionalLayer extends Layer {
 
 	public void computeGradients() {
 		for ( int k = 0 ; k < filters.length ; k++ ) {
-			filters[k].computeGradient( input, error, linearCombinations, stride );
+			filters[k].computeGradient( input, delta, stride );
 		}
 	}
 
@@ -77,7 +76,7 @@ public class ConvolutionalLayer extends Layer {
                     double err = 0;
                     for ( int a = 0 ; a < filterSize ; a++ ) {
                         for ( int b = 0 ; b < filterSize ; b++ ) {
-                            err +=
+                            err += 0;
                         }
                     }
                 }
@@ -87,9 +86,17 @@ public class ConvolutionalLayer extends Layer {
 	}
 
 
-	public double getError( Matrix[] error ) {
-        this.error = error;
-
+	public void setError( Matrix[] error ) {
+        // compute the delta for all nodes
+        delta = new Matrix[error.length];
+        for ( int k = 0 ; k < error.length ; k++ ) {
+            for ( int i = 0 ; i < error[k].getRowDimension() ; i++ ) {
+                for ( int j = 0 ; j < error[k].getColumnDimension() ; j++ ) {
+                    double deltaAtNode = error[k].get(i,j) * linearCombinations[k].get(i,j);
+                    delta[k].set( i, j, deltaAtNode );
+                }
+            }
+        }
 	}
 
 }

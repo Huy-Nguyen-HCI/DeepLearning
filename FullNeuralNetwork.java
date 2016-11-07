@@ -110,7 +110,7 @@ public class FullNeuralNetwork {
 		else {
 			double[] prevLayerOutputs = getOutputsAtLayer( layerIndex - 1 );
 			// softmax: need to compute output of all neurons at once
-			if ( neuronLayer[0].getAFType() == Neuron.SOFTMAX ) {
+			if ( neuronLayer[0].getAFType() == ActivationFunctions.SOFTMAX ) {
 				outputs = ActivationFunctions.softmaxAF( prevLayerOutputs );
 			}
 			// otherwise, compute output of each neuron independently and add to the output array
