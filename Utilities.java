@@ -45,4 +45,14 @@ public class Utilities {
 		bias[0] = new Matrix( new double[][]{new double[]{value}} );
 		return bias;
 	}
+
+
+
+	public static Matrix[] createMatrixWithSameDimension( Matrix[] input ) {
+		Matrix[] output = new Matrix[input.length];
+		for ( int k = 0 ; k < input.length ; k++ ) {
+			output[k] = new Matrix( input[k].getRowDimension(), input[k].getColumnDimension() );
+		}
+		return output;
+	}
 }
