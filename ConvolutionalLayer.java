@@ -56,6 +56,13 @@ public class ConvolutionalLayer extends Layer {
 
 	public void computeGradients() {
 		for ( int k = 0 ; k < filters.length ; k++ ) {
+			Filter filter3D = filters[k];
+			filter3D.
+		}
+	}
+
+	public void computeGradients() {
+		for ( int k = 0 ; k < filters.length ; k++ ) {
 			for ( int a = 0 ; a < filters[k].getRowDimension() ; a++ ) {
 				for ( int b = 0 ; b < filters[k].getColumnDimension() ; b++ ) {					
 					Matrix filter = filters[k];
@@ -71,13 +78,14 @@ public class ConvolutionalLayer extends Layer {
 		}
 	}
 
+
 	public double computeNodeDelta( int depth, int x, int y ) {
-		return error[depth].get(x,y) * ActivationFunctions.applyActivationFunctionDerivative();
+		return error[depth].get(x,y) * ActivationFunctions.applyActivationFunctionDerivative( linearCombinations[depth] );
 	}
 
 
 	public double getOutput( int depth, int x, int y ) {
-		return ActivationFunctions.applyActivationFunction( linearCombinations[depth].get(x,y) );
+		return ActivationFunctions.applyActivationFunction( activationFunction, linearCombinations[depth].get(x,y) );
 	}
 
 
