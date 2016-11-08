@@ -55,4 +55,15 @@ public class Utilities {
 		}
 		return output;
 	}
+
+
+	public static boolean matricesHaveSameDimension( Matrix[] a, Matrix[] b ) {
+		if ( a.length != b.length ) return false;
+		for ( int i = 0 ; i < a.length ; i++ ) {
+			if (a[i].getRowDimension() != b[i].getRowDimension() ||
+					a[i].getColumnDimension() != b[i].getColumnDimension())
+				return false;
+		}
+		return true;
+	}
 }

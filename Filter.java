@@ -12,15 +12,14 @@ public class Filter {
     public Filter( int filterSize ) {
         this.filterSize = filterSize;
         weights = new Matrix[FILTER_DEPTH];
-        gradients = new Matrix[FILTER_DEPTH];
         for ( int i = 0 ; i < FILTER_DEPTH ; i++ ) {
             weights[i] = new Matrix(filterSize, filterSize);
-            gradients[i] = new Matrix(filterSize, filterSize);
         }
+        gradients = Utilities.createMatrixWithSameDimension( weights );
     }
 
 
-    public Matrix computeLinearCombination( Matrix[] input, int stride ) {
+    public Matrix computeLinearCombination( Matrix[] input, int stride, double bias ) {
         assert input.length == FILTER_DEPTH : "Input must have size K x K x 3";
         int input2DSize = input[0].getRowDimension();
         int numberOfSteps = (input2DSize - filterSize) / stride + 1;
@@ -29,19 +28,20 @@ public class Filter {
             for ( int j = 0 ; j < numberOfSteps ; j++ ) {
                 double linearCombinationSum = 0;
                 // get one 2D slice of the input
-                for ( int k = 0 ; k < input.length ; k++ ) {
+                for ( int k = 0 ; k < FILTER_DEPTH  ; k++ ) {
                     Matrix mappedRegion = input[k].getMatrix(
                             stride * i,
-                            stride * i + filterSize,
+                            stride * i + filterSize - 1,
                             stride * j,
-                            stride * j + filterSize
+                            stride * j + filterSize - 1
                     );
                     // weights[k] gets mapped to a region in input[k]
                     linearCombinationSum += mappedRegion.arrayTimes(weights[k]).sum();
                 }
-                output2DBoard.set( i, j, linearCombinationSum );
+                output2DBoard.set( i, j, linearCombinationSum + bias );
             }
         }
+        return output2DBoard;
     }
 
 

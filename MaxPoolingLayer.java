@@ -7,6 +7,7 @@ public class MaxPoolingLayer extends Layer {
 
 	int spatialExtent;
 	int stride;
+	Matrix[] error;
 
 	public MaxPoolingLayer( int spatialExtent, int stride, int activationFunction ) {
 		super( activationFunction );
@@ -19,8 +20,9 @@ public class MaxPoolingLayer extends Layer {
 	 */
 	public Matrix[] getOutput() {
 		int outputSize = ( input[0].getRowDimension() - spatialExtent ) / stride;
-		Matrix[] output = new Matrix[input.size];
-		for ( int k = 0 ; k < input.lengths ; k++ ) {
+		assert( input.length == Filter.FILTER_DEPTH );
+		Matrix[] output = new Matrix[input.length];
+		for ( int k = 0 ; k < output.length ; k++ ) {
 			output[k] = new Matrix( outputSize, outputSize );
 			for ( int i = 0 ; i < outputSize ; i++ ) {
 				for ( int j = 0 ; j < outputSize ; j++ ) {
@@ -31,11 +33,20 @@ public class MaxPoolingLayer extends Layer {
 						j * stride + spatialExtent - 1 
 					);
 					// get the maximum value
-					output[k][i][j] = mappedRegion.norm2();
+					output[k].set( i, j, mappedRegion.norm2() );
 				}
 			}
 		}
-		
 		return output;
+	}
+
+
+	public void setError( Matrix[] error ) {
+		this.error = error;
+	}
+
+
+	public Matrix[] propagateError() {
+		return error;
 	}
 }
