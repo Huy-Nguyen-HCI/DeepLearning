@@ -4,23 +4,29 @@ import Jama.Matrix;
  * Created by nguyenha on 11/6/2016.
  */
 public class Filter {
-    public static final int FILTER_DEPTH = 3;
+
     Matrix[] weights;
     Matrix[] gradients;
     int filterSize;
 
-    public Filter( int filterSize ) {
+    public Filter( int filterSize, int filterDepth ) {
         this.filterSize = filterSize;
-        weights = new Matrix[FILTER_DEPTH];
-        for ( int i = 0 ; i < FILTER_DEPTH ; i++ ) {
+        weights = new Matrix[filterDepth];
+        for ( int i = 0 ; i < filterDepth ; i++ ) {
             weights[i] = new Matrix(filterSize, filterSize);
         }
         gradients = Utilities.createMatrixWithSameDimension( weights );
     }
 
 
+    public Filter( Matrix[] weights ) {
+        this.weights = weights;
+        filterSize = weights[0].getRowDimension();
+//        gradients = Utilities.createMatrixWithSameDimension( weights );
+    }
+
+
     public Matrix computeLinearCombination( Matrix[] input, int stride, double bias ) {
-        assert input.length == FILTER_DEPTH : "Input must have size K x K x 3";
         int input2DSize = input[0].getRowDimension();
         int numberOfSteps = (input2DSize - filterSize) / stride + 1;
         Matrix output2DBoard = new Matrix(numberOfSteps, numberOfSteps);
@@ -28,15 +34,16 @@ public class Filter {
             for ( int j = 0 ; j < numberOfSteps ; j++ ) {
                 double linearCombinationSum = 0;
                 // get one 2D slice of the input
-                for ( int k = 0 ; k < FILTER_DEPTH  ; k++ ) {
+                for ( int k = 0 ; k < weights.length  ; k++ ) {
                     Matrix mappedRegion = input[k].getMatrix(
                             stride * i,
                             stride * i + filterSize - 1,
                             stride * j,
                             stride * j + filterSize - 1
                     );
+                    Matrix filter = weights[k];
                     // weights[k] gets mapped to a region in input[k]
-                    linearCombinationSum += mappedRegion.arrayTimes(weights[k]).sum();
+                    linearCombinationSum += mappedRegion.arrayTimes(filter).sum();
                 }
                 output2DBoard.set( i, j, linearCombinationSum + bias );
             }
@@ -46,7 +53,7 @@ public class Filter {
 
 
     public void computeGradient( Matrix[] input, Matrix[] delta, int stride ) {
-        for ( int depth = 0 ; depth < FILTER_DEPTH ; depth ++ ) {
+        for ( int depth = 0 ; depth < weights.length ; depth ++ ) {
             Matrix filterSlice = weights[depth];
             Matrix inputSlice = input[depth];
             Matrix deltaSlice = delta[depth];

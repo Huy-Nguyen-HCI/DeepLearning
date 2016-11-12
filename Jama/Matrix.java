@@ -1043,6 +1043,19 @@ public class Matrix implements Cloneable, java.io.Serializable {
    }
 
 
+   @Override
+   public String toString() {
+      String result = "";
+      for ( int i = 0 ; i < m ; i++ ) {
+         for ( int j = 0 ; j < n ; j++ ) {
+            result += ( A[i][j] + " " );
+         }
+         result += " *** ";
+      }
+      return result;
+   }
+
+
 /* ------------------------
    Private Methods
  * ------------------------ */
@@ -1051,7 +1064,7 @@ public class Matrix implements Cloneable, java.io.Serializable {
 
    private void checkMatrixDimensions (Matrix B) {
       if (B.m != m || B.n != n) {
-         throw new IllegalArgumentException("Matrix dimensions must agree.");
+         throw new IllegalArgumentException("Matrix dimensions must agree. B has dimension " + m + " " + n + " " + B);
       }
    }
 

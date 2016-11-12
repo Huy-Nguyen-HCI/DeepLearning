@@ -22,20 +22,18 @@ public class Neuron {
 
 	public double output() {
 		return ActivationFunctions.applyActivationFunction( activationFunctionType, evaluateLinearCombination() );
-		// todo. save output to a variable		
-		return output;
 	}
 
 
 	public double getAFDerivative() {
 		switch ( activationFunctionType ) {
-			case LINEAR:
+			case ActivationFunctions.LINEAR:
 				return ActivationFunctions.d_linearAF( evaluateLinearCombination() );
-			case SIGMOID:
+			case ActivationFunctions.SIGMOID:
 				return ActivationFunctions.d_sigmoidAF( evaluateLinearCombination() );
-			case HYPERBOLIC:
+			case ActivationFunctions.HYPERBOLIC:
 				return ActivationFunctions.d_hyperbolicAF( evaluateLinearCombination() );
-			case RELU:
+			case ActivationFunctions.RELU:
 				return ActivationFunctions.d_reLUAF( evaluateLinearCombination() );
 			default:
 				assert false : "Error. Unrecognized activation function.";

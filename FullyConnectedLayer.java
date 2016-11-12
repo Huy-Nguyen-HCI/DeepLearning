@@ -5,26 +5,26 @@ import Jama.Matrix;
 public class FullyConnectedLayer extends Layer {
 
 	int neuronCount;
-	double[][][][] weights;
+	Matrix[][] weights;
 
 	public FullyConnectedLayer( int neuronCount, int activationFunction ) {
 		super( activationFunction );
 		this.neuronCount = neuronCount;
 	}
 
-	@Override
-	public void setInput( Matrix[] input ) {
-		this.input = input;
-		// initialize weight array
-		int inputSize = input[0].getRowDimension();
-		weights = new double[neuronCount][][][];
-		for ( int i = 0 ; i < weights.length ; i++ ) {
-			weights[i] = new double[input.length][][];
-			for ( int j = 0 ; j < weights[i].length ; j++ ) {
-				weights[i][j] = new Matrix( inputSize, inputSize );
-			}
-		}
-	}
+//	@Override
+//	public void setInput( Matrix[] input ) {
+//		this.input = input;
+//		// initialize weight array
+//		int inputSize = input[0].getRowDimension();
+//		weights = new double[neuronCount][][][];
+//		for ( int i = 0 ; i < weights.length ; i++ ) {
+//			weights[i] = new double[input.length][][];
+//			for ( int j = 0 ; j < weights[i].length ; j++ ) {
+//				weights[i][j] = new Matrix( inputSize, inputSize );
+//			}
+//		}
+//	}
 
 
 	public void computeLinearCombinations() {
@@ -32,7 +32,7 @@ public class FullyConnectedLayer extends Layer {
 	}
 
 
-	public double output() {
-		
-	}
+//	public double output() {
+//
+//	}
 }

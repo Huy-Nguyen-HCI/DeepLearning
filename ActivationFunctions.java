@@ -136,8 +136,6 @@ public class ActivationFunctions {
 		switch ( activationFunctionType ) {
 			case LINEAR:
 				return ActivationFunctions.d_linearAF( input );
-			case STEP:
-				return ActivationFunctions.d_stepAF( input );
 			case SIGMOID:
 				return ActivationFunctions.d_sigmoidAF( input );
 			case HYPERBOLIC:

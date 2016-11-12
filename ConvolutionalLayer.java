@@ -7,9 +7,6 @@ import javax.swing.*;
  */
 public class ConvolutionalLayer extends Layer {
 
-	// filter has the same depth with images
-	final int FILTER_DEPTH = 3;
-	
 	// filter parameters
 	Filter[] filters;
 	int stride; // number of steps to take for next scan
@@ -19,6 +16,7 @@ public class ConvolutionalLayer extends Layer {
 	Matrix[] linearCombinations;
     Matrix[] delta;
 	double[] bias;
+	int padding;
 
 	/**
 	* Take a 3D matrix as input.
@@ -36,9 +34,19 @@ public class ConvolutionalLayer extends Layer {
 		filters = new Filter[numberOfFilters];
 		linearCombinations = new Matrix[numberOfFilters];
 		this.stride = stride;
-		padInput( padding );
+		this.padding = padding;
 		assert ( bias.length == numberOfFilters );
 		this.bias = bias;
+	}
+
+
+	@Override
+	public void setInput( Matrix[] input ) {
+		this.input = input;
+		padInput( padding );
+		for ( int i = 0 ; i < filters.length ; i++ ) {
+			filters[i] = new Filter( filterSize, input.length );
+		}
 	}
 
 
@@ -48,14 +56,13 @@ public class ConvolutionalLayer extends Layer {
 	 * @param padding the number of layers of 0s to pad
 	 */
 	public void padInput( int padding ) {
-		assert input.length == Filter.FILTER_DEPTH;
-		for ( int k = 0 ; k < Filter.FILTER_DEPTH ; k++ ) {
-			Matrix padded = new Matrix( input[k].getRowDimension() + padding , input[k].getColumnDimension() + padding );
+		for ( int k = 0 ; k < input.length ; k++ ) {
+			Matrix padded = new Matrix( input[k].getRowDimension() + 2*padding , input[k].getColumnDimension() + 2*padding );
 			int m = padded.getRowDimension();
 			int n = padded.getColumnDimension();
 			for ( int i = 0 ; i < m ; i++ ) {
 				for ( int j = 0 ; j < n ; j++ ) {
-					double newValue = (i >= padding && i < m - padding) ? input[k].get(i-padding,j-padding) : 0;
+					double newValue = (i >= padding && i < m - padding && j >= padding && j < n - padding ) ? input[k].get(i-padding,j-padding) : 0;
 					padded.set( i, j, newValue );
 				}
 			}
@@ -90,12 +97,13 @@ public class ConvolutionalLayer extends Layer {
 	 * @return the linear combination matrix after applying activation functions
 	 */
 	public Matrix[] getOutput() {
+		computeLinearCombinations();
 		Matrix[] output = new Matrix[linearCombinations.length];
-		for ( int k = 0 ; k < linearCombinations ; k++ ) {
+		for ( int k = 0 ; k < linearCombinations.length ; k++ ) {
 			output[k] = new Matrix( linearCombinations[k].getRowDimension(), linearCombinations[k].getColumnDimension() );
 			for ( int i = 0 ; i < linearCombinations[k].getRowDimension() ; i++ ) {
 				for ( int j = 0 ; j < linearCombinations[k].getColumnDimension() ; j++ ) {
-					output[k].set( i, j, getOutput(k, i, j) );
+					output[k].set( i, j, getOutputAtNeuron(k, i, j) );
 				}
 			}
 		}
@@ -110,7 +118,7 @@ public class ConvolutionalLayer extends Layer {
 	 * @param y the y-value within the 2D slice
 	 * @return the number at location <tt>output[depth][x][y]</tt>
 	 */
-	public double getOutput( int depth, int x, int y ) {
+	public double getOutputAtNeuron( int depth, int x, int y ) {
 		return ActivationFunctions.applyActivationFunction( activationFunction, linearCombinations[depth].get(x,y) );
 	}
 
@@ -121,11 +129,31 @@ public class ConvolutionalLayer extends Layer {
 	 */
 	public Matrix[] propagateError() {
         Matrix[] error = Utilities.createMatrixWithSameDimension( input );
-        for ( int depth = 0 ; depth < Filter.FILTER_DEPTH ; depth++ ) {
-			for ( int i = )
+		for ( int inputDepth = 0 ; inputDepth < input.length ; inputDepth ++ ) {
+			for ( int i = padding ; i < input[inputDepth].getRowDimension() - padding ; i++ ) {
+				for ( int j = padding ; j < input[inputDepth].getColumnDimension() - padding ; j++ ) {
+					// take all the weights connected to input[k][i][j]
+					double err = 0;
+					for ( int a = 0 ; a < filterSize ; a++ ) {
+						for ( int b = 0 ; b < filterSize ; b++ ) {
+							int x = i - a*stride;
+							int y = j - b*stride;
+							if ( x >= 0 && y < output[inputDepth].getRowDimension() && y >= 0 &&
+									y < output[inputDepth].getColumnDimension()
+							)
+							{
+								for ( int filterN = 0 ; filterN < filters.length ; filterN++ ) {
+									err += delta[filterN].get(x,y) * filters[filterN].weights[inputDepth].get(x,y);
+								}
+							}
+						}
+					}
+				}
+			}
 		}
         return error;
 	}
+
 
 
 	public void setError( Matrix[] error ) {
@@ -140,6 +168,18 @@ public class ConvolutionalLayer extends Layer {
                 }
             }
         }
+	}
+
+
+	public void setFilters( double[][][][] weights ) {
+		filters = new Filter[weights.length];
+		for ( int i = 0; i < weights.length ; i++ ) {
+			Matrix[] matrixArr = new Matrix[weights[i].length];
+			for ( int j = 0 ; j < weights[i].length ; j++ ) {
+				matrixArr[j] = new Matrix( weights[i][j] );
+			}
+			filters[i] = new Filter( matrixArr );
+		}
 	}
 
 }

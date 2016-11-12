@@ -51,6 +51,7 @@ public class Utilities {
 	public static Matrix[] createMatrixWithSameDimension( Matrix[] input ) {
 		Matrix[] output = new Matrix[input.length];
 		for ( int k = 0 ; k < input.length ; k++ ) {
+			if ( input[k] == null ) System.out.println(k);
 			output[k] = new Matrix( input[k].getRowDimension(), input[k].getColumnDimension() );
 		}
 		return output;
@@ -65,5 +66,18 @@ public class Utilities {
 				return false;
 		}
 		return true;
+	}
+
+
+	public static void print3DMatrix( Matrix[] matrix ) {
+		for ( int k = 0 ; k < matrix.length ; k++ ) {
+			for ( int i = 0 ; i < matrix[k].getRowDimension() ; i++ ) {
+				for ( int j = 0 ; j < matrix[k].getColumnDimension() ; j++ ) {
+					System.out.print( matrix[k].get(i,j) + " " );
+				}
+				System.out.println();
+			}
+			System.out.println("\n\n");
+		}
 	}
 }
