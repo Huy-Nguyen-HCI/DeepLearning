@@ -18,27 +18,28 @@ public class MaxPoolingLayer extends Layer {
 	/**
 	 * Return a 3D matrix of smaller dimension after maxpooling
 	 */
-//	public Matrix[] getOutput() {
-//		int outputSize = ( input[0].getRowDimension() - spatialExtent ) / stride;
-//		assert( input.length == Filter.FILTER_DEPTH );
-//		Matrix[] output = new Matrix[input.length];
-//		for ( int k = 0 ; k < output.length ; k++ ) {
-//			output[k] = new Matrix( outputSize, outputSize );
-//			for ( int i = 0 ; i < outputSize ; i++ ) {
-//				for ( int j = 0 ; j < outputSize ; j++ ) {
-//					Matrix mappedRegion = input[k].getMatrix(
-//						i * stride,
-//						i * stride + spatialExtent - 1,
-//						j * stride,
-//						j * stride + spatialExtent - 1
-//					);
-//					// get the maximum value
-//					output[k].set( i, j, mappedRegion.norm2() );
-//				}
-//			}
-//		}
-//		return output;
-//	}
+	public Matrix[] getOutput() {
+		Matrix[] output = new Matrix[input.length];
+		for ( int k = 0 ; k < input.length ; k++ ) {
+			int numberOfSteps = ( input[k].getRowDimension() - spatialExtent ) / stride + 1;
+			output[k] = new Matrix( numberOfSteps , numberOfSteps );
+			// downsample input[k] to output[k]
+			for ( int i = 0 ; i < numberOfSteps ; i++ ) {
+				for ( int j = 0 ; j < numberOfSteps ; j++ ) {
+					// look at a 2D board at depth k
+					Matrix mappedRegion = input[k].getMatrix(
+							stride * i,
+							stride * i + spatialExtent - 1,
+							stride * j,
+							stride * j + spatialExtent - 1
+					);
+					double max = mappedRegion.findMax();
+					output[k].set( i, j, max );
+				}
+			}
+		}
+		return output;
+	}
 
 
 	public void setError( Matrix[] error ) {
