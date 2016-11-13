@@ -1043,6 +1043,17 @@ public class Matrix implements Cloneable, java.io.Serializable {
    }
 
 
+   public double findMax() {
+      double max = 0;
+      for ( int i = 0 ; i < m ; i++ ) {
+         for ( int j = 0 ; j < n ; j++ ) {
+            if ( A[i][j] > max ) max = A[i][j];
+         }
+      }
+      return max;
+   }
+
+
    @Override
    public String toString() {
       String result = "";
