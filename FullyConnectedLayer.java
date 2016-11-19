@@ -4,24 +4,24 @@ import Jama.Matrix;
  */
 public class FullyConnectedLayer extends Layer {
 
-	int neuronCount;
 	double[][] weights;
 	double[] oneDimensionalInput;
 
 	double[] linearCombinations;
 	double[] delta;
+	double[][] gradients;
 
 
 	public FullyConnectedLayer( int neuronCount, int activationFunction ) {
 		super( activationFunction );
-		this.neuronCount = neuronCount;
 		delta = new double[neuronCount];
 		linearCombinations = new double[neuronCount];
+		initializeWeights();
+
 	}
 
 	/************** FEEDFORWARD *****************/
 	public void initializeWeights() {
-		assert ( weights != null );
 		for ( int i = 0 ; i < weights.length ; i++ ) {
 			for ( int j = 0 ; j < weights[i].length ; j++ ) {
 				weights[i][j] = Utilities.getRandomNumberInRange( -1, 1 );
@@ -29,17 +29,23 @@ public class FullyConnectedLayer extends Layer {
 		}
 	}
 
+
+	public void initializeGradients() {
+		gradients = new double[weights.length][weights[0].length];
+	}
+
+
 	public void setInput( Matrix[] input ) {
 		this.input = input;
-		int totalInputNeuron = input.length * input[0].getRowDimension() * input[0].getColumnDimension();
-		weights = new double[neuronCount][totalInputNeuron];
+		int totalInputNeuronNumber = input.length * input[0].getRowDimension() * input[0].getColumnDimension();
+		weights = new double[delta.length][totalInputNeuronNumber];
 		initializeWeights();
 	}
 
 
 	public void setInput( double[] input ) {
 		oneDimensionalInput = input;
-		weights = new double[neuronCount][input.length];
+		weights = new double[delta.length][input.length];
 		initializeWeights();
 	}
 
@@ -47,7 +53,7 @@ public class FullyConnectedLayer extends Layer {
 	public void getLinearCombination() {
 
 		// if input is a 3D matrix
-		if ( input != null ) {
+		if ( input != null && oneDimensionalInput == null ) {
 			for ( int i = 0 ; i < output.length ; i++ ) {
 				linearCombinations[i] = getLinearCombinationAtNeuron(i);
 			}
@@ -88,14 +94,41 @@ public class FullyConnectedLayer extends Layer {
 
 
 	public void calculateDeltaForHiddenLayer( double[] nextLayerDelta, double[][] nextLayerWeights ) {
+		assert( nextLayerDelta.length == nextLayerWeights.length );
 		for ( int i = 0 ; i < delta.length ; i++ ) {
 			double derivative =
 					ActivationFunctions.applyActivationFunctionDerivative( activationFunction, linearCombinations[i] );
-			double deltaSum = 0;
+			double propagatedError = 0;
 			for ( int j = 0 ; j < nextLayerDelta.length ; j++ ) {
-				deltaSum += nextLayerWeights[j][i] * nextLayerDelta[j];
+				propagatedError += nextLayerWeights[j][i] * nextLayerDelta[j];
 			}
-			delta[i] = deltaSum;
+			delta[i] = propagatedError * derivative;
 		}
+	}
+
+
+	public void calculateGradients() {
+		for ( int i = 0 ; i < weights.length ; i++ ) {
+			for ( int j = 0 ; j < weights[i].length ; j++ ) {
+				double gradient = delta[i] * getInputBeforeFlattened( j );
+				gradients[i][j] += gradient;
+			}
+		}
+	}
+
+
+	public double getInputBeforeFlattened( int index ) {
+		if ( oneDimensionalInput != null ) {
+			return oneDimensionalInput[index];
+		}
+		int oneDimensionalSize = input[0].getRowDimension();
+		int twoDimensionalSize = oneDimensionalSize * oneDimensionalSize;
+
+		int depth = index / twoDimensionalSize;
+		index = index % twoDimensionalSize;
+		int row = index / oneDimensionalSize;
+		index = index % oneDimensionalSize;
+		int column = index;
+		return input[depth].get( row, column);
 	}
 }
