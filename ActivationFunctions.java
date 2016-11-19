@@ -100,16 +100,14 @@ public class ActivationFunctions {
 		return prob;
 	}
 
-	// todo. derivative of softmax
-	
-	/**
-	 * Sigmoid function with bias in a single-input neural network.
-	 * @param x the input value.
-	 * @param w the weight of <tt>x</tt>.
-	 * @param bias a constant to adjust the slope or shape of the activation function.
-	 */
-	public static double singleInputNeuralNetwork( double x, double weight, double bias ) {
-		return sigmoidAF( weight * x + bias );
+
+	public static double[] d_softmaxAF( double[] outputNeuron ) {
+		double[] prob = softmaxAF( outputNeuron );
+		double[] derivative = new double[prob.length];
+		for ( int i = 0 ; i < derivative.length ; i++ ) {
+			derivative[i] = prob[i] * ( 1 - prob[i] );
+		}
+		return derivative;
 	}
 
 

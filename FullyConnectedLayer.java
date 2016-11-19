@@ -85,10 +85,14 @@ public class FullyConnectedLayer extends Layer {
 
 	/************** BACKPROPAGATION *****************/
 	public void calculateDeltaForOutputLayer( double[] target ) {
-		for ( int i = 0 ; i < delta.length ; i++ ) {
-			delta[i] =
-					(target[i] - linearCombinations[i]) *
-					ActivationFunctions.applyActivationFunctionDerivative( activationFunction, linearCombinations[i] );
+		if ( activationFunction == ActivationFunctions.SOFTMAX ) {
+			delta = ActivationFunctions.d_softmaxAF( linearCombinations );
+		}
+		else {
+			for ( int i = 0 ; i < delta.length ; i++ ) {
+				delta[i] = (target[i] - linearCombinations[i]) *
+						ActivationFunctions.applyActivationFunctionDerivative( activationFunction, linearCombinations[i] );
+			}
 		}
 	}
 
@@ -118,9 +122,7 @@ public class FullyConnectedLayer extends Layer {
 
 
 	public double getInputBeforeFlattened( int index ) {
-		if ( oneDimensionalInput != null ) {
-			return oneDimensionalInput[index];
-		}
+		if ( oneDimensionalInput != null ) return oneDimensionalInput[index];
 		int oneDimensionalSize = input[0].getRowDimension();
 		int twoDimensionalSize = oneDimensionalSize * oneDimensionalSize;
 
@@ -131,4 +133,30 @@ public class FullyConnectedLayer extends Layer {
 		int column = index;
 		return input[depth].get( row, column);
 	}
+
+
+	public double[] propagateError() {
+		return delta;
+	}
+
+
+	public Matrix[] propagateError() {
+		int oneDimensionalSize = input[0].getRowDimension();
+		int twoDimensionalSize = oneDimensionalSize * oneDimensionalSize;
+
+		Matrix[] error = Utilities.createMatrixWithSameDimension( input );
+		for ( int k = 0 ; k < error.length ; k++ ) {
+			for ( int i = 0 ; i < error[i].getRowDimension() ; i++ ) {
+				for ( int j = 0 ; j < error[j].getColumnDimension() ; j++ ) {
+					double err = 0;
+					for ( int nodeIndex = 0 ; nodeIndex < delta.length ; nodeIndex ++ ) {
+						err += delta[nodeIndex] * weights[nodeIndex][ k * twoDimensionalSize + oneDimensionalSize ];
+					}
+				}
+			}
+		}
+		return error;
+	}
+
+
 }
