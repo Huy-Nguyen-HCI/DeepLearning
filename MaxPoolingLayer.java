@@ -13,16 +13,17 @@ public class MaxPoolingLayer extends Layer {
 	Matrix[] error;
 	HashMap<Position, Position> maxPositions = new HashMap<>();
 
-	public MaxPoolingLayer( int spatialExtent, int stride, int activationFunction ) {
-		super( activationFunction );
+	public MaxPoolingLayer( int spatialExtent, int stride ) {
 		this.spatialExtent = spatialExtent;
 		this.stride = stride;
 	}
 
+	/*********************** FEEDFORWARD ***************************************/
+
 	/**
 	 * Return a 3D matrix of smaller dimension after maxpooling
 	 */
-	public Matrix[] getOutput() {
+	public Matrix[] computeOutput() {
 		Matrix[] output = new Matrix[input.length];
 		for ( int k = 0 ; k < input.length ; k++ ) {
 			int numberOfSteps = ( input[k].getRowDimension() - spatialExtent ) / stride + 1;
@@ -40,6 +41,7 @@ public class MaxPoolingLayer extends Layer {
 					int[] maxPosition = mappedRegion.findPositionOfMax();
 					double max = mappedRegion.findMax();
 					output[k].set( i, j, max );
+					// (i,j) takes value from ( maxPosition[0], maxPosition[1] )
 					maxPositions.put(
 							new Position(maxPosition[0],maxPosition[1], k),
 							new Position( i, j, k )
@@ -51,6 +53,7 @@ public class MaxPoolingLayer extends Layer {
 	}
 
 
+	/*********************** BACKPROPAGATION ***************************************/
 	public void setError( Matrix[] error ) {
 		this.error = error;
 	}
@@ -61,9 +64,14 @@ public class MaxPoolingLayer extends Layer {
 		for ( int k = 0 ; k < propagatedError.length ; k++ ) {
 			for ( int i = 0 ; i < propagatedError[k].getRowDimension() ; i++ ) {
 				for ( int j = 0 ; j < propagatedError[k].getColumnDimension() ; j++ ) {
-					Position pos = new Position(i,j,k);
-					double err = maxPositions.containsKey(pos) ? maxPositions.get(pos) : 0;
-					propagatedError[k].set( i, j, err );
+					Position pos = new Position( k, i, j );
+					if ( maxPositions.containsKey(pos) ) {
+						Position errorSource = maxPositions.get(pos);
+						propagatedError[k].set( i, j, error[errorSource.depth].get( errorSource.row, errorSource. column ) );
+					}
+					else {
+						propagatedError[k].set( i, j, 0 );
+					}
 				}
 			}
 		}
@@ -72,12 +80,12 @@ public class MaxPoolingLayer extends Layer {
 
 
 	class Position {
-		Integer x, y, z;
+		Integer depth, row, column;
 
-		Position( Integer x, Integer y, Integer z ) {
-			this.x = x;
-			this.y = y;
-			this.z = z;
+		Position( Integer depth, Integer row, Integer column ) {
+			this.depth = depth;
+			this.row = row;
+			this.column = column;
 		}
 
 
@@ -85,12 +93,13 @@ public class MaxPoolingLayer extends Layer {
 		public boolean equals( Object o ) {
 			if ( !(o instanceof Position) ) return false;
 			Position pos = (Position) o;
-			return x.equals(pos.x) && y.equals(pos.y) && z.equals(pos.z);
+			return depth.equals(pos.depth) && row.equals(pos.row) && column.equals(pos.column);
 		}
+
 
 		@Override
 		public int hashCode() {
-			return x.hashCode() + y.hashCode() + z.hashCode();
+			return depth.hashCode() + row.hashCode() + column.hashCode();
 		}
 	}
 }

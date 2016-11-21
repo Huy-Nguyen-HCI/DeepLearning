@@ -5,21 +5,22 @@ import Jama.Matrix;
  */
 public class Layer {
 
+	public static final int
+			CONVOLUTIONAL = 0,
+			MAX_POOLING = 1,
+			FULLY_CONNECTED = 2;
+
 	Matrix[] input;
 	int activationFunction;
-	Matrix[] output;
 
 	public Layer( int activationFunction ) {
 		this.activationFunction = activationFunction;
 	}
 
-	
+	public Layer() { this(-1); }
+
 	public void setInput( Matrix[] input ) {
 		this.input = input;
 	}	
 
-
-	public Matrix[] getOutput() {
-		return (output == null) ? input : output;
-	}
 }

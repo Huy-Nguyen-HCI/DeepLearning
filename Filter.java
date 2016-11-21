@@ -1,4 +1,5 @@
 import Jama.Matrix;
+import com.sun.xml.internal.ws.assembler.jaxws.MustUnderstandTubeFactory;
 
 /**
  * Created by nguyenha on 11/6/2016.
@@ -8,12 +9,18 @@ public class Filter {
     Matrix[] weights;
     Matrix[] gradients;
     int filterSize;
+    double bias = 1;
 
     public Filter( int filterSize, int filterDepth ) {
         this.filterSize = filterSize;
         weights = new Matrix[filterDepth];
         for ( int i = 0 ; i < filterDepth ; i++ ) {
             weights[i] = new Matrix(filterSize, filterSize);
+            for ( int row = 0 ; row < filterSize ; row++ ) {
+                for ( int column = 0 ; column < filterSize ; column++ ) {
+                    weights[i].set( row, column, Utilities.getRandomNumberInRange(-1,1) );
+                }
+            }
         }
         gradients = Utilities.createMatrixWithSameDimension( weights );
     }
@@ -25,8 +32,9 @@ public class Filter {
 //        gradients = Utilities.createMatrixWithSameDimension( weights );
     }
 
+    /*********************** FEEDFORWARD ***************************************/
 
-    public Matrix computeLinearCombination( Matrix[] input, int stride, double bias ) {
+    public Matrix computeLinearCombination( Matrix[] input, int stride ) {
         int input2DSize = input[0].getRowDimension();
         int numberOfSteps = (input2DSize - filterSize) / stride + 1;
         Matrix output2DBoard = new Matrix(numberOfSteps, numberOfSteps);
@@ -51,6 +59,8 @@ public class Filter {
         return output2DBoard;
     }
 
+
+    /*********************** BACKPROPAGATION ***************************************/
 
     public void computeGradient( Matrix[] input, Matrix[] delta, int stride ) {
         for ( int depth = 0 ; depth < weights.length ; depth ++ ) {

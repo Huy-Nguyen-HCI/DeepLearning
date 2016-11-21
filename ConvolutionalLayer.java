@@ -7,16 +7,14 @@ import javax.swing.*;
  */
 public class ConvolutionalLayer extends Layer {
 
-	// filter parameters
-	Filter[] filters;
+	int padding;
+	Filter[] filters; // filter parameters
 	int stride; // number of steps to take for next scan
 	int filterSize; // width and height of filter
 
 	// backpropagation info
 	Matrix[] linearCombinations;
     Matrix[] delta;
-	double[] bias;
-	int padding;
 
 	/**
 	* Take a 3D matrix as input.
@@ -26,8 +24,7 @@ public class ConvolutionalLayer extends Layer {
 			int filterSize,
 			int stride,
 			int padding,
-			int activationFunctionType,
-			double[] bias)
+			int activationFunctionType)
 	{
 		super( activationFunctionType );
 		this.filterSize = filterSize;
@@ -35,8 +32,6 @@ public class ConvolutionalLayer extends Layer {
 		linearCombinations = new Matrix[numberOfFilters];
 		this.stride = stride;
 		this.padding = padding;
-		assert ( bias.length == numberOfFilters );
-		this.bias = bias;
 	}
 
 
@@ -77,7 +72,7 @@ public class ConvolutionalLayer extends Layer {
 	public void computeLinearCombinations() {
 		// each filter produces one 2D output
 		for ( int k = 0 ; k < filters.length ; k++ ) {
-			linearCombinations[k] = filters[k].computeLinearCombination( input, stride, bias[k] );
+			linearCombinations[k] = filters[k].computeLinearCombination( input, stride );
 		}
 	}
 
@@ -96,14 +91,13 @@ public class ConvolutionalLayer extends Layer {
 	 * Get the output matrix.
 	 * @return the linear combination matrix after applying activation functions
 	 */
-	public Matrix[] getOutput() {
-		computeLinearCombinations();
-		Matrix[] output = new Matrix[linearCombinations.length];
+	public Matrix[] computeOutput() {
+		Matrix[] output = Utilities.createMatrixWithSameDimension( linearCombinations );
 		for ( int k = 0 ; k < linearCombinations.length ; k++ ) {
-			output[k] = new Matrix( linearCombinations[k].getRowDimension(), linearCombinations[k].getColumnDimension() );
 			for ( int i = 0 ; i < linearCombinations[k].getRowDimension() ; i++ ) {
 				for ( int j = 0 ; j < linearCombinations[k].getColumnDimension() ; j++ ) {
-					output[k].set( i, j, getOutputAtNeuron(k, i, j) );
+					double outputAtNeuron = ActivationFunctions.applyActivationFunction( activationFunction, linearCombinations[k].get(i,j) );
+					output[k].set( i, j, outputAtNeuron );
 				}
 			}
 		}
@@ -112,47 +106,66 @@ public class ConvolutionalLayer extends Layer {
 
 
 	/**
-	 * Get the output value at the specified location
-	 * @param depth the index of the 2D slice
-	 * @param x the x-value within the 2D slice
-	 * @param y the y-value within the 2D slice
-	 * @return the number at location <tt>output[depth][x][y]</tt>
-	 */
-	public double getOutputAtNeuron( int depth, int x, int y ) {
-		return ActivationFunctions.applyActivationFunction( activationFunction, linearCombinations[depth].get(x,y) );
-	}
-
-
-	/**
 	 *
 	 * @return
 	 */
-	public Matrix[] propagateError() {
-        Matrix[] error = Utilities.createMatrixWithSameDimension( input );
-		for ( int inputDepth = 0 ; inputDepth < input.length ; inputDepth ++ ) {
-			for ( int i = padding ; i < input[inputDepth].getRowDimension() - padding ; i++ ) {
-				for ( int j = padding ; j < input[inputDepth].getColumnDimension() - padding ; j++ ) {
-					// take all the weights connected to input[k][i][j]
-					double err = 0;
-					for ( int a = 0 ; a < filterSize ; a++ ) {
-						for ( int b = 0 ; b < filterSize ; b++ ) {
-							int x = i - a*stride;
-							int y = j - b*stride;
-							if ( x >= 0 && y < output[inputDepth].getRowDimension() && y >= 0 &&
-									y < output[inputDepth].getColumnDimension()
-							)
-							{
-								for ( int filterN = 0 ; filterN < filters.length ; filterN++ ) {
-									err += delta[filterN].get(x,y) * filters[filterN].weights[inputDepth].get(x,y);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-        return error;
-	}
+//	public Matrix[] propagateError() {
+//        Matrix[] error = Utilities.createMatrixWithSameDimension( input );
+//		for ( int inputDepth = 0 ; inputDepth < input.length ; inputDepth ++ ) {
+//			for ( int i = padding ; i < input[inputDepth].getRowDimension() - padding ; i++ ) {
+//				for ( int j = padding ; j < input[inputDepth].getColumnDimension() - padding ; j++ ) {
+//					// take all the weights connected to input[k][i][j]
+//					double err = 0;
+//					for ( int a = 0 ; a < filterSize ; a++ ) {
+//						for ( int b = 0 ; b < filterSize ; b++ ) {
+//							int x = i - a*stride;
+//							int y = j - b*stride;
+//							if ( x >= 0 && y < output[inputDepth].getRowDimension() && y >= 0 &&
+//									y < output[inputDepth].getColumnDimension()
+//							)
+//							{
+//								for ( int filterN = 0 ; filterN < filters.length ; filterN++ ) {
+//									err += delta[filterN].get(x,y) * filters[filterN].weights[inputDepth].get(x,y);
+//								}
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
+//        return error;
+//	}
+
+//	public Matrix[] propagateError() {
+//		// create a matrix with the same size as the original input
+//		Matrix[] propagatedError = new Matrix[input.length];
+//		for ( int i = 0 ; i < input.length ; i++ ) {
+//			Matrix paddedInput = input[i];
+//			propagatedError[i] = new Matrix( paddedInput.getRowDimension() - 2*padding, paddedInput.getColumnDimension() - 2*padding );
+//		}
+//		int input2DSize = input[0].getRowDimension();
+//		int output2DSize = (input2DSize - filterSize) / stride + 1;
+//
+//		// calculate error for each neuron in the input
+//		for ( int k = 0 ; k < propagatedError.length ; k++ ) {
+//			for ( int i = 0 ; i < propagatedError[k].getRowDimension() ; i++ ) {
+//				for ( int j = 0 ; j < propagatedError[k].getColumnDimension() ; j++ ) {
+//					// take all the weights connected to input[k][i][j]
+//					double err = 0;
+//					for ( int a = 0 ; a < filterSize ; a++ ) {
+//						for ( int b = 0 ; b < filterSize ; b++ ) {
+//							int row = i - a * stride;
+//							int column = j - b * stride;
+//							if ( row >= 0 && row < output2DSize && column >= 0 && column < output2DSize ) {
+//
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
+//		return propagatedError;
+//	}
 
 
 

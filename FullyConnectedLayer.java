@@ -16,16 +16,16 @@ public class FullyConnectedLayer extends Layer {
 		super( activationFunction );
 		delta = new double[neuronCount];
 		linearCombinations = new double[neuronCount];
-		initializeWeights();
-
 	}
 
-	/************** FEEDFORWARD *****************/
+	/*********************** FEEDFORWARD ***********************/
 	public void initializeWeights() {
 		for ( int i = 0 ; i < weights.length ; i++ ) {
 			for ( int j = 0 ; j < weights[i].length ; j++ ) {
 				weights[i][j] = Utilities.getRandomNumberInRange( -1, 1 );
 			}
+			System.out.println("weights at " + i + " is: " );
+			Utilities.printArray( weights[i] );
 		}
 	}
 
@@ -50,25 +50,39 @@ public class FullyConnectedLayer extends Layer {
 	}
 
 
-	public void getLinearCombination() {
-
+	public void computeLinearCombinations() {
 		// if input is a 3D matrix
 		if ( input != null && oneDimensionalInput == null ) {
-			for ( int i = 0 ; i < output.length ; i++ ) {
+			for ( int i = 0 ; i < linearCombinations.length ; i++ ) {
 				linearCombinations[i] = getLinearCombinationAtNeuron(i);
 			}
 		}
-
-		assert( oneDimensionalInput != null );
-		for ( int i = 0 ; i < output.length ; i++ ) {
-			for ( int j = 0 ; j < oneDimensionalInput.length ; j++ ) {
-				linearCombinations[i] += oneDimensionalInput[i] * weights[i][j];
+		else {
+			assert( oneDimensionalInput != null );
+			for ( int i = 0 ; i < linearCombinations.length ; i++ ) {
+				for ( int j = 0 ; j < oneDimensionalInput.length ; j++ ) {
+					linearCombinations[i] += oneDimensionalInput[j] * weights[i][j];
+				}
 			}
 		}
+		System.out.println( "linear combination is: " );
+		Utilities.printArray( linearCombinations );
 	}
 
 
-	public double getLinearCombinationAtNeuron( int neuronIndex ) {
+	public double[] computeOutput() {
+		if ( activationFunction == ActivationFunctions.SOFTMAX ) {
+			return ActivationFunctions.softmaxAF( linearCombinations );
+		}
+		double[] outputs = new double[linearCombinations.length];
+		for ( int i = 0 ; i < linearCombinations.length ; i++ ) {
+			outputs[i] = ActivationFunctions.applyActivationFunction( activationFunction, linearCombinations[i] );
+		}
+		return outputs;
+	}
+
+
+	private double getLinearCombinationAtNeuron( int neuronIndex ) {
 		double output = 0;
 		int count = 0;
 		for ( int k = 0 ; k < input.length ; k++ ) {
@@ -83,8 +97,17 @@ public class FullyConnectedLayer extends Layer {
 	}
 
 
-	/************** BACKPROPAGATION *****************/
-	public void calculateDeltaForOutputLayer( double[] target ) {
+	/*********************** BACKPROPAGATION ***********************/
+
+	public void setError( double[] error ) {
+		assert ( activationFunction != ActivationFunctions.SOFTMAX );
+		for ( int i = 0 ; i < delta.length ; i++ ) {
+			delta[i] = error[i] * ActivationFunctions.applyActivationFunctionDerivative( activationFunction, linearCombinations[i] );
+		}
+	}
+
+
+	public void computeNodeDeltasForOutputLayer( double[] target ) {
 		if ( activationFunction == ActivationFunctions.SOFTMAX ) {
 			delta = ActivationFunctions.d_softmaxAF( linearCombinations );
 		}
@@ -97,21 +120,7 @@ public class FullyConnectedLayer extends Layer {
 	}
 
 
-	public void calculateDeltaForHiddenLayer( double[] nextLayerDelta, double[][] nextLayerWeights ) {
-		assert( nextLayerDelta.length == nextLayerWeights.length );
-		for ( int i = 0 ; i < delta.length ; i++ ) {
-			double derivative =
-					ActivationFunctions.applyActivationFunctionDerivative( activationFunction, linearCombinations[i] );
-			double propagatedError = 0;
-			for ( int j = 0 ; j < nextLayerDelta.length ; j++ ) {
-				propagatedError += nextLayerWeights[j][i] * nextLayerDelta[j];
-			}
-			delta[i] = propagatedError * derivative;
-		}
-	}
-
-
-	public void calculateGradients() {
+	public void computeGradients() {
 		for ( int i = 0 ; i < weights.length ; i++ ) {
 			for ( int j = 0 ; j < weights[i].length ; j++ ) {
 				double gradient = delta[i] * getInputBeforeFlattened( j );
@@ -121,8 +130,10 @@ public class FullyConnectedLayer extends Layer {
 	}
 
 
-	public double getInputBeforeFlattened( int index ) {
-		if ( oneDimensionalInput != null ) return oneDimensionalInput[index];
+	private double getInputBeforeFlattened( int index ) {
+		if ( oneDimensionalInput != null )
+			return oneDimensionalInput[index];
+
 		int oneDimensionalSize = input[0].getRowDimension();
 		int twoDimensionalSize = oneDimensionalSize * oneDimensionalSize;
 
@@ -135,12 +146,19 @@ public class FullyConnectedLayer extends Layer {
 	}
 
 
-	public double[] propagateError() {
-		return delta;
+	public double[] propagateOneDimensionalError() {
+		assert( oneDimensionalInput != null );
+		double[] propagatedError = new double[oneDimensionalInput.length];
+		for ( int i = 0 ; i < propagatedError.length ; i++ ) {
+			for ( int j = 0 ; j < delta.length ; j++ ) {
+				propagatedError[i] += weights[j][i] * delta[j];
+			}
+		}
+		return propagatedError;
 	}
 
 
-	public Matrix[] propagateError() {
+	public Matrix[] propagateThreeDimensionalError() {
 		int oneDimensionalSize = input[0].getRowDimension();
 		int twoDimensionalSize = oneDimensionalSize * oneDimensionalSize;
 
@@ -152,6 +170,7 @@ public class FullyConnectedLayer extends Layer {
 					for ( int nodeIndex = 0 ; nodeIndex < delta.length ; nodeIndex ++ ) {
 						err += delta[nodeIndex] * weights[nodeIndex][ k * twoDimensionalSize + oneDimensionalSize ];
 					}
+					error[k].set( i, j, err );
 				}
 			}
 		}
