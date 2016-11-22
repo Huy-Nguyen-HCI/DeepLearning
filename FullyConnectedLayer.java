@@ -164,8 +164,8 @@ public class FullyConnectedLayer extends Layer {
 
 		Matrix[] error = Utilities.createMatrixWithSameDimension( input );
 		for ( int k = 0 ; k < error.length ; k++ ) {
-			for ( int i = 0 ; i < error[i].getRowDimension() ; i++ ) {
-				for ( int j = 0 ; j < error[j].getColumnDimension() ; j++ ) {
+			for ( int i = 0 ; i < error[k].getRowDimension() ; i++ ) {
+				for ( int j = 0 ; j < error[k].getColumnDimension() ; j++ ) {
 					double err = 0;
 					for ( int nodeIndex = 0 ; nodeIndex < delta.length ; nodeIndex ++ ) {
 						err += delta[nodeIndex] * weights[nodeIndex][ k * twoDimensionalSize + oneDimensionalSize ];

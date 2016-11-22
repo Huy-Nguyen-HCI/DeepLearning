@@ -91,4 +91,10 @@ public class Filter {
             }
         }
     }
+
+
+    /*********************** GETTERS AND SETTERS **************/
+    public double getWeight( int depth, int row, int column ) {
+        return weights[depth].get( row, column );
+    }
 }

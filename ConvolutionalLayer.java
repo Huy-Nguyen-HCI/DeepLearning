@@ -1,5 +1,5 @@
 import Jama.Matrix;
-
+import java.util.ArrayList;
 import javax.swing.*;
 
 /**
@@ -104,11 +104,6 @@ public class ConvolutionalLayer extends Layer {
 		return output;
 	}
 
-
-	/**
-	 *
-	 * @return
-	 */
 //	public Matrix[] propagateError() {
 //        Matrix[] error = Utilities.createMatrixWithSameDimension( input );
 //		for ( int inputDepth = 0 ; inputDepth < input.length ; inputDepth ++ ) {
@@ -136,37 +131,36 @@ public class ConvolutionalLayer extends Layer {
 //        return error;
 //	}
 
-//	public Matrix[] propagateError() {
-//		// create a matrix with the same size as the original input
-//		Matrix[] propagatedError = new Matrix[input.length];
-//		for ( int i = 0 ; i < input.length ; i++ ) {
-//			Matrix paddedInput = input[i];
-//			propagatedError[i] = new Matrix( paddedInput.getRowDimension() - 2*padding, paddedInput.getColumnDimension() - 2*padding );
-//		}
-//		int input2DSize = input[0].getRowDimension();
-//		int output2DSize = (input2DSize - filterSize) / stride + 1;
-//
-//		// calculate error for each neuron in the input
-//		for ( int k = 0 ; k < propagatedError.length ; k++ ) {
-//			for ( int i = 0 ; i < propagatedError[k].getRowDimension() ; i++ ) {
-//				for ( int j = 0 ; j < propagatedError[k].getColumnDimension() ; j++ ) {
-//					// take all the weights connected to input[k][i][j]
-//					double err = 0;
-//					for ( int a = 0 ; a < filterSize ; a++ ) {
-//						for ( int b = 0 ; b < filterSize ; b++ ) {
-//							int row = i - a * stride;
-//							int column = j - b * stride;
-//							if ( row >= 0 && row < output2DSize && column >= 0 && column < output2DSize ) {
-//
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
-//		return propagatedError;
-//	}
 
+	public Matrix[] propagateError() {
+		Matrix[] error = Utilities.createMatrixWithSameDimension( input );
+		for ( int k = 0 ; k < input.length ; k++ ) {
+			for ( int i = padding ; i < input[k].getRowDimension() - padding ; i++ ) {
+				for ( int j = padding ; j < input[k].getColumnDimension() - padding ; j++ ) {
+					error[k].set( i, j, propagateErrorAtNeuron(k, i, j) );
+				}
+			}
+		}
+		return error;
+	}
+
+
+	public double propagateErrorAtNeuron( int depth, int row, int column ) {
+		double error = 0;
+		int outputSize = (input[0].getRowDimension() - filterSize) / stride + 1;
+		for ( int a = 0 ; a < filterSize ; a++ ) {
+			for ( int b = 0 ; b < filterSize ; b++ ) {
+				int outputRow = (row - a) / stride;
+				int outputColumn = (column - b) / stride;
+				if ( outputRow >= 0 && outputRow < outputSize && outputColumn >= 0 && outputColumn < outputSize ) {
+					for ( int filterIndex = 0 ; filterIndex < filters.length ; filterIndex ++ ) {
+						error += delta[filterIndex].get( outputRow, outputColumn ) * filters[filterIndex].getWeight( depth, row, column );
+					}
+				}
+			}
+		}
+		return error;
+	}
 
 
 	public void setError( Matrix[] error ) {
