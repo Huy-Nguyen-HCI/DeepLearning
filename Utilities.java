@@ -36,7 +36,8 @@ public class Utilities {
 
 	public static double getRandomNumberInRange( double start, double end ) {
 		double random = new Random().nextDouble();
-		return start + (random * (end - start));
+        random = Math.round(random * 100.0) / 100.0;
+        return start + (random * (end - start));
 	}
 
 

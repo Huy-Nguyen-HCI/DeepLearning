@@ -9,11 +9,10 @@ public class ConvolutionalNeuralNetwork {
 	Layer[] layers;
 
 	public ConvolutionalNeuralNetwork() {
-		layers = new Layer[4];
-		layers[0] = new ConvolutionalLayer( 2, 3, 2, 1, ActivationFunctions.LINEAR );
-		layers[1] = new MaxPoolingLayer( 2, 1 );
-		layers[2] = new FullyConnectedLayer( 5, ActivationFunctions.LINEAR );
-		layers[3] = new FullyConnectedLayer( 3, ActivationFunctions.SOFTMAX );
+		layers = new Layer[3];
+		layers[0] = new ConvolutionalLayer( 1, 2, 1, 0, ActivationFunctions.LINEAR );
+		layers[1] = new FullyConnectedLayer( 2, ActivationFunctions.LINEAR );
+		layers[2] = new FullyConnectedLayer( 2, ActivationFunctions.SOFTMAX );
 	}
 
 
@@ -26,45 +25,7 @@ public class ConvolutionalNeuralNetwork {
 				ConvolutionalLayer convLayer = (ConvolutionalLayer) layers[i];
 				convLayer.setInput( threeDimensionalInput );
 				if ( i == 0 ) {
-					((ConvolutionalLayer) layers[0]).setFilters(
-							new double[][][][] {
-									new double[][][] {
-											new double[][] {
-													new double[]{1,1,1},
-													new double[]{1,1,1},
-													new double[]{1,1,1}
-											},
-											new double[][] {
-													new double[]{0,-1,0},
-													new double[]{0,1,1},
-													new double[]{-1,1,-1}
-											},
-											new double[][] {
-													new double[]{1,0,1},
-													new double[]{-1,1,0},
-													new double[]{-1,1,1}
-											}
-									},
-									new double[][][] {
-											new double[][] {
-													new double[]{1,1,0},
-													new double[]{0,0,-1},
-													new double[]{0,0,1}
-											},
-											new double[][] {
-													new double[]{-1,0,-1},
-													new double[]{-1,1,-1},
-													new double[]{-1,0,1}
-											},
-											new double[][] {
-													new double[]{1,1,-1},
-													new double[]{-1,1,1},
-													new double[]{1,1,0}
-											}
-									}
-							}
-
-					);
+					setInitialWeightsForTesting();
 				}
 				convLayer.computeLinearCombinations();
 				threeDimensionalInput = convLayer.computeOutput();
@@ -74,7 +35,7 @@ public class ConvolutionalNeuralNetwork {
 				MaxPoolingLayer maxPool = (MaxPoolingLayer) layers[i];
 				maxPool.setInput( threeDimensionalInput );
 				threeDimensionalInput = maxPool.computeOutput();
-				Utilities.print3DMatrix( threeDimensionalInput );
+//				Utilities.print3DMatrix( threeDimensionalInput );
 			}
 			else {
 				assert ( layers[i] instanceof FullyConnectedLayer );
@@ -91,15 +52,87 @@ public class ConvolutionalNeuralNetwork {
 				}
 				fullLayer.computeLinearCombinations();
 				oneDimensionalInput = fullLayer.computeOutput();
-				Utilities.printArray( oneDimensionalInput );
+//				Utilities.printArray( oneDimensionalInput );
 			}
 		}
 		Utilities.printArray( oneDimensionalInput );
 	}
 
 
-	public void backwardPropagation() {
+	public void backwardPropagation( double[] target ) {
+		double[] oneDimensionalError = null;
+		Matrix[] threeDimensionalError = null;
+		for ( int i = layers.length - 1 ; i >= 0 ; i-- ) {
 
+			// calculate deltas and gradients
+			if ( i == layers.length - 1 ) {
+				assert( layers[i] instanceof FullyConnectedLayer );
+				FullyConnectedLayer outputLayer = (FullyConnectedLayer) layers[i];
+				outputLayer.computeNodeDeltasForOutputLayer( target );
+			}
+			else {
+				if ( layers[i] instanceof FullyConnectedLayer ) {
+					assert( oneDimensionalError != null );
+					FullyConnectedLayer fullLayer = (FullyConnectedLayer) layers[i];
+					fullLayer.setErrorAndComputeDeltas( oneDimensionalError );
+					fullLayer.computeGradients();
+				}
+				else if ( layers[i] instanceof MaxPoolingLayer ) {
+					assert( threeDimensionalError != null );
+					MaxPoolingLayer maxPool = (MaxPoolingLayer) layers[i];
+					maxPool.setError( threeDimensionalError );
+				}
+				else {
+					assert( threeDimensionalError != null );
+					ConvolutionalLayer convLayer = (ConvolutionalLayer) layers[i];
+					convLayer.setError( threeDimensionalError );
+					convLayer.computeGradients();
+				}
+			}
+
+			// propagate errors
+			if ( i > 0 && layers[i-1] instanceof FullyConnectedLayer ) {
+				oneDimensionalError = layers[i].propagateOneDimensionalError();
+			}
+			else {
+				threeDimensionalError = layers[i].propagateThreeDimensionalError();
+			}
+		}
+
+		System.out.println("\n\nTESTING BACKPROPAGATION\n\n");
+
+		for ( int i = layers.length - 1 ; i >= 0 ; i-- ) {
+			if ( layers[i] instanceof FullyConnectedLayer ) {
+				System.out.println("layer " + i + ":");
+				Utilities.printArray( ((FullyConnectedLayer) layers[i]).delta );
+			}
+			else if ( layers[i] instanceof ConvolutionalLayer ) {
+				System.out.println("layer " + i + ":");
+				Utilities.print3DMatrix( ((ConvolutionalLayer) layers[i]).delta );
+			}
+		}
+	}
+
+
+	private void setInitialWeightsForTesting() {
+		((ConvolutionalLayer) layers[0]).setFilters(
+				new double[][][][] {
+						new double[][][] {
+								new double[][] {
+										new double[]{1,0},
+										new double[]{0,1},
+								},
+								new double[][] {
+										new double[]{1,1},
+										new double[]{0,0},
+								},
+								new double[][] {
+										new double[]{0,1},
+										new double[]{1,0},
+								}
+						}
+				}
+		);
 	}
 
 }

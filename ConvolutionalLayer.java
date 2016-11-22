@@ -34,6 +34,7 @@ public class ConvolutionalLayer extends Layer {
 		this.padding = padding;
 	}
 
+	/*********************** FEEDFORWARD ***************************************/
 
 	@Override
 	public void setInput( Matrix[] input ) {
@@ -78,16 +79,6 @@ public class ConvolutionalLayer extends Layer {
 
 
 	/**
-	 * Compute the gradient of each weight in the 4D weight matrix (the filters)
-	 */
-	public void computeGradients() {
-		for ( int k = 0 ; k < filters.length ; k++ ) {
-			filters[k].computeGradient( input, delta, stride );
-		}
-	}
-
-
-	/**
 	 * Get the output matrix.
 	 * @return the linear combination matrix after applying activation functions
 	 */
@@ -102,6 +93,33 @@ public class ConvolutionalLayer extends Layer {
 			}
 		}
 		return output;
+	}
+
+
+	/*********************** BACKPROPAGATION ***************************************/
+
+	public void setError( Matrix[] error ) {
+		// compute the delta for all nodes
+		delta = Utilities.createMatrixWithSameDimension( error );
+		for ( int k = 0 ; k < error.length ; k++ ) {
+			for ( int i = 0 ; i < error[k].getRowDimension() ; i++ ) {
+				for ( int j = 0 ; j < error[k].getColumnDimension() ; j++ ) {
+					double deltaAtNode = error[k].get(i,j) *
+							ActivationFunctions.applyActivationFunctionDerivative( activationFunction, linearCombinations[k].get(i,j) );
+					delta[k].set( i, j, deltaAtNode );
+				}
+			}
+		}
+	}
+
+
+	/**
+	 * Compute the gradient of each weight in the 4D weight matrix (the filters)
+	 */
+	public void computeGradients() {
+		for ( int k = 0 ; k < filters.length ; k++ ) {
+			filters[k].computeGradient( input, delta[k], stride );
+		}
 	}
 
 //	public Matrix[] propagateError() {
@@ -132,12 +150,16 @@ public class ConvolutionalLayer extends Layer {
 //	}
 
 
-	public Matrix[] propagateError() {
-		Matrix[] error = Utilities.createMatrixWithSameDimension( input );
+	@Override
+	public Matrix[] propagateThreeDimensionalError() {
+		Matrix[] error = new Matrix[input.length];
+		for ( int i = 0 ; i < error.length ; i++ ) {
+			error[i] = new Matrix( input[i].getRowDimension() - 2*padding, input[i].getColumnDimension() - 2*padding );
+		}
 		for ( int k = 0 ; k < input.length ; k++ ) {
 			for ( int i = padding ; i < input[k].getRowDimension() - padding ; i++ ) {
 				for ( int j = padding ; j < input[k].getColumnDimension() - padding ; j++ ) {
-					error[k].set( i, j, propagateErrorAtNeuron(k, i, j) );
+					error[k].set( i - padding, j - padding, propagateErrorAtNeuron(k, i, j) );
 				}
 			}
 		}
@@ -145,7 +167,7 @@ public class ConvolutionalLayer extends Layer {
 	}
 
 
-	public double propagateErrorAtNeuron( int depth, int row, int column ) {
+	private double propagateErrorAtNeuron( int depth, int row, int column ) {
 		double error = 0;
 		int outputSize = (input[0].getRowDimension() - filterSize) / stride + 1;
 		for ( int a = 0 ; a < filterSize ; a++ ) {
@@ -154,7 +176,7 @@ public class ConvolutionalLayer extends Layer {
 				int outputColumn = (column - b) / stride;
 				if ( outputRow >= 0 && outputRow < outputSize && outputColumn >= 0 && outputColumn < outputSize ) {
 					for ( int filterIndex = 0 ; filterIndex < filters.length ; filterIndex ++ ) {
-						error += delta[filterIndex].get( outputRow, outputColumn ) * filters[filterIndex].getWeight( depth, row, column );
+						error += delta[filterIndex].get( outputRow, outputColumn ) * filters[filterIndex].getWeight( depth, a, b );
 					}
 				}
 			}
@@ -163,20 +185,7 @@ public class ConvolutionalLayer extends Layer {
 	}
 
 
-	public void setError( Matrix[] error ) {
-        // compute the delta for all nodes
-        delta = Utilities.createMatrixWithSameDimension( error );
-        for ( int k = 0 ; k < error.length ; k++ ) {
-            for ( int i = 0 ; i < error[k].getRowDimension() ; i++ ) {
-                for ( int j = 0 ; j < error[k].getColumnDimension() ; j++ ) {
-                    double deltaAtNode = error[k].get(i,j) *
-							ActivationFunctions.applyActivationFunctionDerivative( activationFunction, linearCombinations[k].get(i,j) );
-                    delta[k].set( i, j, deltaAtNode );
-                }
-            }
-        }
-	}
-
+	/*********************** GETTERS AND SETTERS ***************************************/
 
 	public void setFilters( double[][][][] weights ) {
 		filters = new Filter[weights.length];

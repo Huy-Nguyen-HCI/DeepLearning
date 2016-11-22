@@ -59,7 +59,8 @@ public class MaxPoolingLayer extends Layer {
 	}
 
 
-	public Matrix[] propagateError() {
+	@Override
+	public Matrix[] propagateThreeDimensionalError() {
 		Matrix[] propagatedError = Utilities.createMatrixWithSameDimension( input );
 		for ( int k = 0 ; k < propagatedError.length ; k++ ) {
 			for ( int i = 0 ; i < propagatedError[k].getRowDimension() ; i++ ) {

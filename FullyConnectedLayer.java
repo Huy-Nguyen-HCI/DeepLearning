@@ -27,10 +27,11 @@ public class FullyConnectedLayer extends Layer {
 			System.out.println("weights at " + i + " is: " );
 			Utilities.printArray( weights[i] );
 		}
+		initializeGradients();
 	}
 
 
-	public void initializeGradients() {
+	private void initializeGradients() {
 		gradients = new double[weights.length][weights[0].length];
 	}
 
@@ -65,8 +66,8 @@ public class FullyConnectedLayer extends Layer {
 				}
 			}
 		}
-		System.out.println( "linear combination is: " );
-		Utilities.printArray( linearCombinations );
+//		System.out.println( "linear combination is: " );
+//		Utilities.printArray( linearCombinations );
 	}
 
 
@@ -99,7 +100,7 @@ public class FullyConnectedLayer extends Layer {
 
 	/*********************** BACKPROPAGATION ***********************/
 
-	public void setError( double[] error ) {
+	public void setErrorAndComputeDeltas( double[] error ) {
 		assert ( activationFunction != ActivationFunctions.SOFTMAX );
 		for ( int i = 0 ; i < delta.length ; i++ ) {
 			delta[i] = error[i] * ActivationFunctions.applyActivationFunctionDerivative( activationFunction, linearCombinations[i] );
@@ -146,6 +147,7 @@ public class FullyConnectedLayer extends Layer {
 	}
 
 
+	@Override
 	public double[] propagateOneDimensionalError() {
 		assert( oneDimensionalInput != null );
 		double[] propagatedError = new double[oneDimensionalInput.length];
@@ -158,6 +160,7 @@ public class FullyConnectedLayer extends Layer {
 	}
 
 
+	@Override
 	public Matrix[] propagateThreeDimensionalError() {
 		int oneDimensionalSize = input[0].getRowDimension();
 		int twoDimensionalSize = oneDimensionalSize * oneDimensionalSize;
@@ -176,6 +179,4 @@ public class FullyConnectedLayer extends Layer {
 		}
 		return error;
 	}
-
-
 }

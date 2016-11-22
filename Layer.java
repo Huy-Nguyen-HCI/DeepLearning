@@ -21,6 +21,10 @@ public class Layer {
 
 	public void setInput( Matrix[] input ) {
 		this.input = input;
-	}	
+	}
+
+	public double[] propagateOneDimensionalError() { return null; }
+
+	public Matrix[] propagateThreeDimensionalError() { return null; }
 
 }
