@@ -1043,14 +1043,25 @@ public class Matrix implements Cloneable, java.io.Serializable {
    }
 
 
-   public double findMax() {
+   public int[] findPositionOfMax() {
       double max = 0;
+      int[] position = new int[2];
       for ( int i = 0 ; i < m ; i++ ) {
          for ( int j = 0 ; j < n ; j++ ) {
-            if ( A[i][j] > max ) max = A[i][j];
+            if ( A[i][j] > max ) {
+               max = A[i][j];
+               position[0] = i;
+               position[1] = j;
+            }
          }
       }
-      return max;
+      return position;
+   }
+
+
+   public double findMax() {
+      int[] position = findPositionOfMax();
+      return get( position[0], position[1] );
    }
 
 
