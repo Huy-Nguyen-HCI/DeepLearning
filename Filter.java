@@ -1,5 +1,4 @@
 import Jama.Matrix;
-import com.sun.xml.internal.ws.assembler.jaxws.MustUnderstandTubeFactory;
 
 /**
  * Created by nguyenha on 11/6/2016.
@@ -10,6 +9,7 @@ public class Filter {
     Matrix[] gradients;
     int filterSize;
     double bias = 1;
+    double biasGradient = 0;
 
     public Filter( int filterSize, int filterDepth ) {
         this.filterSize = filterSize;
@@ -72,9 +72,9 @@ public class Filter {
             for ( int a = 0 ; a < filterSize ; a++ ) {
                 for ( int b = 0 ; b < filterSize ; b++ ) {
                     double gradient = 0;
-                    int numberOfSteps = (inputSlice.getRowDimension() - filterSize) / stride + 1;
-                    for ( int i = 0 ; i < numberOfSteps ; i++ ) {
-                        for ( int j = 0 ; j < numberOfSteps ; j++ ) {
+                    int output2DSize = (inputSlice.getRowDimension() - filterSize) / stride + 1;
+                    for ( int i = 0 ; i < output2DSize ; i++ ) {
+                        for ( int j = 0 ; j < output2DSize ; j++ ) {
                             // weights at (a,b) connects to input neurons at (a + i*stride, b + j*stride)
                             // to output neurons at (i, j)
                             gradient += inputSlice.get( a + i*stride, b + j*stride ) * deltaSlice.get(i, j);
@@ -84,6 +84,27 @@ public class Filter {
                 }
             }
         }
+
+        biasGradient = bias * deltaSlice.sum();
+    }
+
+
+    public void updateWeights() {
+        for ( int k = 0 ; k < weights.length ; i++ ) {
+            for ( int i = 0 ; i < weights[k].getRowDimension() ; i++ ) {
+                for ( int j = 0 ; j < weights[k].getColumnDimension() ; j++ ) {
+                    weights[k].set( i, j, weights[k].get(i,j) + gradients[k].get(i,j) );
+                }
+            }
+        }
+        clearData();
+    }
+
+
+    public void clearData() {
+        // reinitialize the gradients matrix
+        gradients = Utilities.createMatrixWithSameDimension( gradients );
+        biasGradient = 0;
     }
 
 

@@ -78,4 +78,11 @@ public class MaxPoolingLayer extends Layer {
 		}
 		return propagatedError;
 	}
+
+
+	public void clearData() {
+		super.clearData();
+		error = null;
+		maxPositions = new HashMap<>();
+	}
 }

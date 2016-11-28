@@ -60,6 +60,7 @@ public class ConvolutionalNeuralNetwork {
 
 
 	public void backwardPropagation( double[] target ) {
+		System.out.println("\n\nTESTING BACKPROPAGATION\n\n");
 		double[] oneDimensionalError = null;
 		Matrix[] threeDimensionalError = null;
 		for ( int i = layers.length - 1 ; i >= 0 ; i-- ) {
@@ -69,6 +70,7 @@ public class ConvolutionalNeuralNetwork {
 				assert( layers[i] instanceof FullyConnectedLayer );
 				FullyConnectedLayer outputLayer = (FullyConnectedLayer) layers[i];
 				outputLayer.computeNodeDeltasForOutputLayer( target );
+				outputLayer.computeGradients();
 			}
 			else {
 				if ( layers[i] instanceof FullyConnectedLayer ) {
@@ -99,16 +101,24 @@ public class ConvolutionalNeuralNetwork {
 			}
 		}
 
-		System.out.println("\n\nTESTING BACKPROPAGATION\n\n");
-
 		for ( int i = layers.length - 1 ; i >= 0 ; i-- ) {
 			if ( layers[i] instanceof FullyConnectedLayer ) {
-				System.out.println("layer " + i + ":");
+				System.out.println("delta at layer " + i + ":");
 				Utilities.printArray( ((FullyConnectedLayer) layers[i]).delta );
+				System.out.println("gradients at layer " + i + ":");
+				for ( double[] mat : ((FullyConnectedLayer) layers[i]).gradients ) {
+					Utilities.printArray( mat );
+					System.out.println("&&&");
+				}
+
+				System.out.println();
 			}
 			else if ( layers[i] instanceof ConvolutionalLayer ) {
-				System.out.println("layer " + i + ":");
+				System.out.println("delta at layer " + i + ":");
 				Utilities.print3DMatrix( ((ConvolutionalLayer) layers[i]).delta );
+				System.out.println("gradients at layer " + i + ":");
+				((ConvolutionalLayer) layers[i]).printGradients();
+				System.out.println();
 			}
 		}
 	}

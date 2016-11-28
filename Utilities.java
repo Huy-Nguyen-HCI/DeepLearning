@@ -34,6 +34,15 @@ public class Utilities {
 	}
 
 
+	public static void printArray(double[][][] arr) {
+		Matrix[] mats = new Matrix[arr.length];
+		for ( int i = 0 ; i < arr.length ; i++ ) {
+			mats[i] = new Matrix( arr[i] );
+		}
+		print3DMatrix( mats );
+	}
+
+
 	public static double getRandomNumberInRange( double start, double end ) {
 		double random = new Random().nextDouble();
         random = Math.round(random * 100.0) / 100.0;

@@ -28,7 +28,7 @@ public class Main {
             input[i] = new Matrix(arrInput[i]);
         }
         network.forwardPropagation(input);
-		double[] target = new double[]{ 0, 0, 1};
+		double[] target = new double[]{ 0, 1 };
 		network.backwardPropagation( target );
 	}
 

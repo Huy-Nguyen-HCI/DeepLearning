@@ -98,7 +98,7 @@ public class ConvolutionalLayer extends Layer {
 
 	/*********************** BACKPROPAGATION ***************************************/
 
-	public void setError( Matrix[] error ) {
+	public void setErrorAndComputeDeltas( Matrix[] error ) {
 		// compute the delta for all nodes
 		delta = Utilities.createMatrixWithSameDimension( error );
 		for ( int k = 0 ; k < error.length ; k++ ) {
@@ -111,43 +111,6 @@ public class ConvolutionalLayer extends Layer {
 			}
 		}
 	}
-
-
-	/**
-	 * Compute the gradient of each weight in the 4D weight matrix (the filters)
-	 */
-	public void computeGradients() {
-		for ( int k = 0 ; k < filters.length ; k++ ) {
-			filters[k].computeGradient( input, delta[k], stride );
-		}
-	}
-
-//	public Matrix[] propagateError() {
-//        Matrix[] error = Utilities.createMatrixWithSameDimension( input );
-//		for ( int inputDepth = 0 ; inputDepth < input.length ; inputDepth ++ ) {
-//			for ( int i = padding ; i < input[inputDepth].getRowDimension() - padding ; i++ ) {
-//				for ( int j = padding ; j < input[inputDepth].getColumnDimension() - padding ; j++ ) {
-//					// take all the weights connected to input[k][i][j]
-//					double err = 0;
-//					for ( int a = 0 ; a < filterSize ; a++ ) {
-//						for ( int b = 0 ; b < filterSize ; b++ ) {
-//							int x = i - a*stride;
-//							int y = j - b*stride;
-//							if ( x >= 0 && y < output[inputDepth].getRowDimension() && y >= 0 &&
-//									y < output[inputDepth].getColumnDimension()
-//							)
-//							{
-//								for ( int filterN = 0 ; filterN < filters.length ; filterN++ ) {
-//									err += delta[filterN].get(x,y) * filters[filterN].weights[inputDepth].get(x,y);
-//								}
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
-//        return error;
-//	}
 
 
 	@Override
@@ -185,6 +148,25 @@ public class ConvolutionalLayer extends Layer {
 	}
 
 
+	/**
+	 * Compute the gradient of each weight in the 4D weight matrix (the filters)
+	 */
+	public void computeGradients() {
+		for ( int k = 0 ; k < filters.length ; k++ ) {
+			filters[k].computeGradient( input, delta[k], stride );
+		}
+	}
+
+
+	public void updateWeights() {
+		// todo. separate updateWeights and clearData
+		for ( int i = 0 ; i < filters.length ; i++ ) {
+			filters[i].updateWeights();
+		}
+		super.clearData();
+	}
+
+
 	/*********************** GETTERS AND SETTERS ***************************************/
 
 	public void setFilters( double[][][][] weights ) {
@@ -195,6 +177,13 @@ public class ConvolutionalLayer extends Layer {
 				matrixArr[j] = new Matrix( weights[i][j] );
 			}
 			filters[i] = new Filter( matrixArr );
+		}
+	}
+
+
+	public void printGradients() {
+		for ( int i = 0 ; i < filters.length ; i++ ) {
+			Utilities.print3DMatrix( filters[i].gradients );
 		}
 	}
 

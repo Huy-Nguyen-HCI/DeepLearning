@@ -66,8 +66,8 @@ public class FullyConnectedLayer extends Layer {
 				}
 			}
 		}
-//		System.out.println( "linear combination is: " );
-//		Utilities.printArray( linearCombinations );
+		System.out.println( "linear combination is: " );
+		Utilities.printArray( linearCombinations );
 	}
 
 
@@ -131,6 +131,23 @@ public class FullyConnectedLayer extends Layer {
 	}
 
 
+	public void updateWeights() {
+		for ( int i = 0 ; i < weights.length ; i++ ) {
+			for ( int j = 0 ; j < weights[i].length ; j++ ) {
+				weights[i][j] += gradients[i][j];
+			}
+		}
+		clearData();
+	}
+
+
+	public void clearData() {
+		super.clearData();
+		oneDimensionalInput = null;
+		linearCombinations = new double[linearCombinations.length];
+	}
+
+
 	private double getInputBeforeFlattened( int index ) {
 		if ( oneDimensionalInput != null )
 			return oneDimensionalInput[index];
@@ -171,12 +188,14 @@ public class FullyConnectedLayer extends Layer {
 				for ( int j = 0 ; j < error[k].getColumnDimension() ; j++ ) {
 					double err = 0;
 					for ( int nodeIndex = 0 ; nodeIndex < delta.length ; nodeIndex ++ ) {
-						err += delta[nodeIndex] * weights[nodeIndex][ k * twoDimensionalSize + oneDimensionalSize ];
+						err += delta[nodeIndex] * weights[nodeIndex][ k * twoDimensionalSize + i * oneDimensionalSize + j ];
 					}
 					error[k].set( i, j, err );
 				}
 			}
 		}
+		System.out.println("3d propapagated:" );
+		Utilities.print3DMatrix( error );
 		return error;
 	}
 }

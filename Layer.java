@@ -27,4 +27,6 @@ public class Layer {
 
 	public Matrix[] propagateThreeDimensionalError() { return null; }
 
+	public void clearData() { input = null; }
+
 }
