@@ -111,13 +111,13 @@ public class FullyConnectedLayer extends Layer {
 	public void computeNodeDeltasForOutputLayer( double[] target, int lossFunctionType ) {
 		if ( lossFunctionType == LossFunction.MSE ) {
 			for ( int i = 0 ; i < delta.length ; i++ ) {
-				delta[i] = (target[i] - linearCombinations[i]) *
+				delta[i] = (target[i] - ActivationFunctions.applyActivationFunction(activationFunction, linearCombinations[i])) *
 						ActivationFunctions.applyActivationFunctionDerivative( activationFunction, linearCombinations[i] );
 			}
 		}
 		else if ( lossFunctionType == LossFunction.LOG_LOSS ) {
 			for ( int i = 0 ; i < delta.length ; i++ ) {
-				delta[i] = (target[i] - linearCombinations[i]);
+				delta[i] = (target[i] - ActivationFunctions.applyActivationFunction( activationFunction, linearCombinations[i]));
 			}
 		}
 		else {
@@ -199,6 +199,8 @@ public class FullyConnectedLayer extends Layer {
 				}
 			}
 		}
+		System.out.println("final layer delta");
+		Utilities.printArray( delta );
 		System.out.println("3d propapagated:" );
 		Utilities.print3DMatrix( error );
 		return error;

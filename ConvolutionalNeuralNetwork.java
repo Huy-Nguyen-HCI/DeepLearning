@@ -10,8 +10,8 @@ public class ConvolutionalNeuralNetwork {
 
 	public ConvolutionalNeuralNetwork() {
 		layers = new Layer[3];
-		layers[0] = new ConvolutionalLayer( 1, 2, 1, 0, ActivationFunctions.LINEAR );
-		layers[1] = new FullyConnectedLayer( 2, ActivationFunctions.LINEAR );
+		layers[0] = new ConvolutionalLayer( 2, 3, 2, 1, ActivationFunctions.LINEAR );
+		layers[1] = new MaxPoolingLayer( 2, 1);
 		layers[2] = new FullyConnectedLayer( 2, ActivationFunctions.SOFTMAX );
 	}
 
@@ -55,14 +55,17 @@ public class ConvolutionalNeuralNetwork {
 //				Utilities.printArray( oneDimensionalInput );
 			}
 		}
+		System.out.println("final output: ");
 		Utilities.printArray( oneDimensionalInput );
+		System.out.println();
 	}
 
 
 	public void backwardPropagation( double[] target ) {
-		System.out.println("\n\nTESTING BACKPROPAGATION\n\n");
+		System.out.println("testing backpropagation:");
 		double[] oneDimensionalError = null;
 		Matrix[] threeDimensionalError = null;
+
 		for ( int i = layers.length - 1 ; i >= 0 ; i-- ) {
 
 			// calculate deltas and gradients
@@ -99,6 +102,7 @@ public class ConvolutionalNeuralNetwork {
 			else {
 				threeDimensionalError = layers[i].propagateThreeDimensionalError();
 			}
+
 		}
 
 		for ( int i = layers.length - 1 ; i >= 0 ; i-- ) {
@@ -127,21 +131,41 @@ public class ConvolutionalNeuralNetwork {
 	private void setInitialWeightsForTesting() {
 		((ConvolutionalLayer) layers[0]).setFilters(
 				new double[][][][] {
-						new double[][][] {
-								new double[][] {
-										new double[]{1,0},
-										new double[]{0,1},
-								},
-								new double[][] {
-										new double[]{1,1},
-										new double[]{0,0},
-								},
-								new double[][] {
-										new double[]{0,1},
-										new double[]{1,0},
-								}
-						}
-				}
+                        new double[][][] {
+                                new double[][] {
+                                        new double[]{1,1,1},
+                                        new double[]{1,1,1},
+                                        new double[]{1,1,1}
+                                },
+                                new double[][] {
+                                        new double[]{0,-1,0},
+                                        new double[]{0,1,1},
+                                        new double[]{-1,1,-1}
+                                },
+                                new double[][] {
+                                        new double[]{1,0,1},
+                                        new double[]{-1,1,0},
+                                        new double[]{-1,1,1}
+                                }
+                        },
+                        new double[][][] {
+                                new double[][] {
+                                        new double[]{1,1,0},
+                                        new double[]{0,0,-1},
+                                        new double[]{0,0,1}
+                                },
+                                new double[][] {
+                                        new double[]{-1,0,-1},
+                                        new double[]{-1,1,-1},
+                                        new double[]{-1,0,1}
+                                },
+                                new double[][] {
+                                        new double[]{1,1,-1},
+                                        new double[]{-1,1,1},
+                                        new double[]{1,1,0}
+                                }
+                        }
+                }
 		);
 	}
 

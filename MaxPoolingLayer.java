@@ -39,12 +39,12 @@ public class MaxPoolingLayer extends Layer {
 							stride * j + spatialExtent - 1
 					);
 					int[] maxPosition = mappedRegion.findPositionOfMax();
-					double max = mappedRegion.findMax();
+					double max = mappedRegion.get( maxPosition[0], maxPosition[1] );
 					output[k].set( i, j, max );
 					// (i,j) takes value from ( maxPosition[0], maxPosition[1] )
 					maxPositions.put(
-							new Position(maxPosition[0],maxPosition[1], k),
-							new Position( i, j, k )
+							new Position(k, maxPosition[0],maxPosition[1]),
+							new Position( k, i, j )
 					);
 				}
 			}
@@ -62,9 +62,9 @@ public class MaxPoolingLayer extends Layer {
 	@Override
 	public Matrix[] propagateThreeDimensionalError() {
 		Matrix[] propagatedError = Utilities.createMatrixWithSameDimension( input );
-		for ( int k = 0 ; k < propagatedError.length ; k++ ) {
-			for ( int i = 0 ; i < propagatedError[k].getRowDimension() ; i++ ) {
-				for ( int j = 0 ; j < propagatedError[k].getColumnDimension() ; j++ ) {
+		for ( int k = 0 ; k < input.length ; k++ ) {
+			for ( int i = 0 ; i < input[k].getRowDimension() ; i++ ) {
+				for ( int j = 0 ; j < input[k].getColumnDimension() ; j++ ) {
 					Position pos = new Position( k, i, j );
 					if ( maxPositions.containsKey(pos) ) {
 						Position errorSource = maxPositions.get(pos);
