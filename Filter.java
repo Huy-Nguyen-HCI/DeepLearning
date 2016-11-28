@@ -90,7 +90,7 @@ public class Filter {
 
 
     public void updateWeights() {
-        for ( int k = 0 ; k < weights.length ; i++ ) {
+        for ( int k = 0 ; k < weights.length ; k++ ) {
             for ( int i = 0 ; i < weights[k].getRowDimension() ; i++ ) {
                 for ( int j = 0 ; j < weights[k].getColumnDimension() ; j++ ) {
                     weights[k].set( i, j, weights[k].get(i,j) + gradients[k].get(i,j) );

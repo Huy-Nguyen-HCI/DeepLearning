@@ -108,15 +108,20 @@ public class FullyConnectedLayer extends Layer {
 	}
 
 
-	public void computeNodeDeltasForOutputLayer( double[] target ) {
-		if ( activationFunction == ActivationFunctions.SOFTMAX ) {
-			delta = ActivationFunctions.d_softmaxAF( linearCombinations );
-		}
-		else {
+	public void computeNodeDeltasForOutputLayer( double[] target, int lossFunctionType ) {
+		if ( lossFunctionType == LossFunction.MSE ) {
 			for ( int i = 0 ; i < delta.length ; i++ ) {
 				delta[i] = (target[i] - linearCombinations[i]) *
 						ActivationFunctions.applyActivationFunctionDerivative( activationFunction, linearCombinations[i] );
 			}
+		}
+		else if ( lossFunctionType == LossFunction.LOG_LOSS ) {
+			for ( int i = 0 ; i < delta.length ; i++ ) {
+				delta[i] = (target[i] - linearCombinations[i]);
+			}
+		}
+		else {
+			assert false : "unrecognized loss function";
 		}
 	}
 

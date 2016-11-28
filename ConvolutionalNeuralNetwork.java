@@ -69,7 +69,7 @@ public class ConvolutionalNeuralNetwork {
 			if ( i == layers.length - 1 ) {
 				assert( layers[i] instanceof FullyConnectedLayer );
 				FullyConnectedLayer outputLayer = (FullyConnectedLayer) layers[i];
-				outputLayer.computeNodeDeltasForOutputLayer( target );
+				outputLayer.computeNodeDeltasForOutputLayer( target, LossFunction.LOG_LOSS );
 				outputLayer.computeGradients();
 			}
 			else {
@@ -87,7 +87,7 @@ public class ConvolutionalNeuralNetwork {
 				else {
 					assert( threeDimensionalError != null );
 					ConvolutionalLayer convLayer = (ConvolutionalLayer) layers[i];
-					convLayer.setError( threeDimensionalError );
+					convLayer.setErrorAndComputeDeltas( threeDimensionalError );
 					convLayer.computeGradients();
 				}
 			}
