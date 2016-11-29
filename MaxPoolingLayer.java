@@ -11,7 +11,7 @@ public class MaxPoolingLayer extends Layer {
 	int spatialExtent;
 	int stride;
 	Matrix[] error;
-	HashMap<Position, Position> maxPositions = new HashMap<>();
+	HashMap<Position, Position> maxPositions;
 
 	public MaxPoolingLayer( int spatialExtent, int stride ) {
 		this.spatialExtent = spatialExtent;
@@ -24,6 +24,7 @@ public class MaxPoolingLayer extends Layer {
 	 * Return a 3D matrix of smaller dimension after maxpooling
 	 */
 	public Matrix[] computeOutput() {
+		maxPositions = new HashMap<>();
 		Matrix[] output = new Matrix[input.length];
 		for ( int k = 0 ; k < input.length ; k++ ) {
 			int numberOfSteps = ( input[k].getRowDimension() - spatialExtent ) / stride + 1;

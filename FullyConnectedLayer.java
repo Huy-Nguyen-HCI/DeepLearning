@@ -46,16 +46,20 @@ public class FullyConnectedLayer extends Layer {
 
 	public void setInput( Matrix[] input ) {
 		this.input = input;
-		int totalInputNeuronNumber = input.length * input[0].getRowDimension() * input[0].getColumnDimension();
-		weights = new double[delta.length][totalInputNeuronNumber];
-		initializeWeightsAndGradients();
+        if ( weights == null ) {
+            int totalInputNeuronNumber = input.length * input[0].getRowDimension() * input[0].getColumnDimension();
+            weights = new double[delta.length][totalInputNeuronNumber];
+            initializeWeightsAndGradients();
+        }
 	}
 
 
 	public void setInput( double[] input ) {
 		oneDimensionalInput = input;
-		weights = new double[delta.length][input.length];
-		initializeWeightsAndGradients();
+        if ( weights == null ) {
+            weights = new double[delta.length][input.length];
+            initializeWeightsAndGradients();
+        }
 	}
 
 
