@@ -158,6 +158,7 @@ public class ConvolutionalLayer extends Layer {
 	}
 
 
+	@Override
 	public void updateWeights() {
 		// todo. separate updateWeights and clearData
 		for ( int i = 0 ; i < filters.length ; i++ ) {

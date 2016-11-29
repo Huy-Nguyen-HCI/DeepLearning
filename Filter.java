@@ -97,6 +97,7 @@ public class Filter {
                 }
             }
         }
+        bias += biasGradient;
         clearData();
     }
 

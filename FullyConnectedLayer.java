@@ -140,6 +140,7 @@ public class FullyConnectedLayer extends Layer {
 	}
 
 
+	@Override
 	public void updateWeights() {
 		for ( int i = 0 ; i < weights.length ; i++ ) {
 			for ( int j = 0 ; j < weights[i].length ; j++ ) {
@@ -154,6 +155,7 @@ public class FullyConnectedLayer extends Layer {
 		super.clearData();
 		oneDimensionalInput = null;
 		linearCombinations = new double[linearCombinations.length];
+        gradients = new double[gradients.length][gradients[0].length];
 	}
 
 
