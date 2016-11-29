@@ -41,7 +41,7 @@ public class Main {
 
 
     public static void main(String[] args) {
-        double[][] data = Utilities.readFile("mnist_mini.csv");
+        double[][] data = Utilities.readFile("mnist_train.csv");
         double[][] inputs = getPixels( data );
         double[][] targets = getLabels( data );
 

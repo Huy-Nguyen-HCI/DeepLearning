@@ -458,6 +458,12 @@ public class Matrix implements Cloneable, java.io.Serializable {
       }
    }
 
+
+   public void setRow( int rowIndex, double[] arr ) {
+      assert( n == arr.length );
+      A[rowIndex] = arr;
+   }
+
    /** Matrix transpose.
    @return    A'
    */
