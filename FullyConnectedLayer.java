@@ -149,14 +149,14 @@ public class FullyConnectedLayer extends Layer {
 
 
 	@Override
-	public void updateWeights() {
+	public void updateWeights( int batchSize ) {
 		for ( int i = 0 ; i < weights.length ; i++ ) {
 			for ( int j = 0 ; j < weights[i].length ; j++ ) {
-				weights[i][j] += gradients[i][j];
+				weights[i][j] += gradients[i][j]/batchSize;
 			}
 		}
 		for ( int i = 0 ; i < biasWeights.length ; i++ ) {
-            biasWeights[i] += biasGradients[i];
+            biasWeights[i] += biasGradients[i]/batchSize;
         }
 		clearData();
 	}

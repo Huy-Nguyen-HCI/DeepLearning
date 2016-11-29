@@ -27,7 +27,7 @@ public class Layer {
 
 	public Matrix[] propagateThreeDimensionalError() { return null; }
 
-	public void updateWeights() { }
+	public void updateWeights( int batchSize ) { }
 
 	public void clearData() { input = null; }
 

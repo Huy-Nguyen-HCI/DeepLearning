@@ -59,7 +59,7 @@ public class Main {
 
 
     public static double[][] getLabels( double[][] data ) {
-        double[][] labels = new double[data.length][0];
+        double[][] labels = new double[data.length][10];
         for ( int i = 0 ; i < data.length ; i++ ) {
             double correctAnswer = data[i][0];
             for ( int j = 0 ; j < labels[i].length ; j++ ) {

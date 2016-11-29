@@ -1,6 +1,6 @@
 import java.util.*;
 import Jama.Matrix;
-import java.io.IOException;
+import java.io.*;
 
 public class Utilities {
 
@@ -199,6 +199,13 @@ public class Utilities {
 			}
 		}
 		return index;
+	}
+
+
+	public static double findAverage( double[] arr ) {
+		double sum = 0;
+		for ( double x : arr ) sum += x;
+		return sum / arr.length;
 	}
 
 }

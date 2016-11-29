@@ -4,7 +4,7 @@
 public class ConvolutionalTraining {
 
     ConvolutionalNeuralNetwork network;
-    final int numberOfIterations = 1000;
+    final int numberOfIterations = 500;
     int batchSize = 100;
 
 
@@ -14,20 +14,25 @@ public class ConvolutionalTraining {
 
 
     public void stochasticTraining( double[][] inputs, double[][] targets ) {
+        double[] error = new double[batchSize];
         for ( int j = 0 ; j < numberOfIterations ; j++ ) {
             System.out.println("&&& ITERATION " + j);
             int[] indices = Utilities.generateRandomNumbers( 0, inputs.length, batchSize );
             for ( int i = 0 ; i < indices.length ; i++ ) {
-                iterate( i, inputs[indices[i]], targets[indices[i]] );
+                error[i] = iterate( i, inputs[indices[i]], targets[indices[i]] );
             }
-            network.updateWeights();
+            network.updateWeights( batchSize );
+            System.out.println("error at iteration " + j);
+            System.out.println( Utilities.findAverage(error) );
         }
     }
 
 
-    public void iterate( int iterationNumber, double[] inputs, double[] targets ) {
-        network.forwardPropagation( Utilities.convert1DTo3D(inputs) );
+    public double iterate( int iterationNumber, double[] inputs, double[] targets ) {
+        double[] outputs = network.forwardPropagation( Utilities.convert1DTo3D(inputs) );
+        Utilities.printArray( outputs );
         network.backwardPropagation( targets );
+        return LossFunction.crossEntropyError( outputs, targets );
     }
 
 
@@ -36,14 +41,15 @@ public class ConvolutionalTraining {
         assert( inputs.length == targets.length );
         for ( int i = 0 ; i < inputs.length ; i++ ) {
             double[] outputs = network.forwardPropagation( Utilities.convert1DTo3D(inputs[i]) );
+            System.out.println("output is:");
+            Utilities.printArray( outputs );
+            System.out.println();
             int selectedChoiceIndex = Utilities.findIndexOfMax( outputs );
             int targetChoice = Utilities.findIndexOfMax( targets[i] );
             compares[i] = (selectedChoiceIndex == targetChoice) ? 1 : 0;
         }
         System.out.println("Accuracy is: ");
-        double sum = 0 ;
-        for ( double c : compares ) sum += c;
-        System.out.println( sum / compares.length );
+        System.out.println( Utilities.findAverage(compares) );
     }
 
 }

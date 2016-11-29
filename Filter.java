@@ -89,15 +89,15 @@ public class Filter {
     }
 
 
-    public void updateWeights() {
+    public void updateWeights( int batchSize ) {
         for ( int k = 0 ; k < weights.length ; k++ ) {
             for ( int i = 0 ; i < weights[k].getRowDimension() ; i++ ) {
                 for ( int j = 0 ; j < weights[k].getColumnDimension() ; j++ ) {
-                    weights[k].set( i, j, weights[k].get(i,j) + gradients[k].get(i,j) );
+                    weights[k].set( i, j, weights[k].get(i,j) + gradients[k].get(i,j)/batchSize );
                 }
             }
         }
-        bias += biasGradient;
+        bias += biasGradient/batchSize;
         clearData();
     }
 

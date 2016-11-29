@@ -9,12 +9,13 @@ public class ConvolutionalNeuralNetwork {
     Layer[] layers;
 
     public ConvolutionalNeuralNetwork() {
-        layers = new Layer[5];
-        layers[0] = new ConvolutionalLayer( 32, 5, 1, 2, ActivationFunctions.RELU );
-        layers[1] = new MaxPoolingLayer( 2, 2 );
-        layers[2] = new ConvolutionalLayer( 64, 5, 1, 2, ActivationFunctions.RELU );
-        layers[3] = new FullyConnectedLayer( 1024, ActivationFunctions.RELU );
-        layers[4] = new FullyConnectedLayer( 10, ActivationFunctions.SOFTMAX );
+        layers = new Layer[6];
+        layers[0] = new ConvolutionalLayer( 20, 5, 1, 2, ActivationFunctions.LINEAR );
+        layers[1] = new MaxPoolingLayer( 2, 1 );
+        layers[2] = new ConvolutionalLayer( 50, 5, 1, 2, ActivationFunctions.LINEAR );
+        layers[3] = new MaxPoolingLayer( 2, 2 );
+        layers[4] = new FullyConnectedLayer( 500, ActivationFunctions.RELU );
+        layers[5] = new FullyConnectedLayer( 10, ActivationFunctions.SOFTMAX );
     }
 
 
@@ -51,9 +52,9 @@ public class ConvolutionalNeuralNetwork {
 //				Utilities.printArray( oneDimensionalInput );
             }
         }
-        System.out.println("final output: ");
-        Utilities.printArray(oneDimensionalInput);
-        System.out.println();
+//        System.out.println("final output: ");
+//        Utilities.printArray(oneDimensionalInput);
+//        System.out.println();
         return oneDimensionalInput;
     }
 
@@ -99,9 +100,9 @@ public class ConvolutionalNeuralNetwork {
     }
 
 
-    public void updateWeights() {
+    public void updateWeights( int batchSize ) {
         for ( int i = 0 ; i < layers.length ; i++ ) {
-            layers[i].updateWeights();
+            layers[i].updateWeights( batchSize );
         }
     }
 }
