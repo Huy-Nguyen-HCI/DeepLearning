@@ -23,4 +23,10 @@ public class Position {
     public int hashCode() {
         return depth.hashCode() + row.hashCode() + column.hashCode();
     }
+
+
+    @Override
+    public String toString() {
+        return "(" + depth + "," + row + "," + column + ")";
+    }
 }

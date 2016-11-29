@@ -38,7 +38,11 @@ public class MaxPoolingLayer extends Layer {
 							stride * j,
 							stride * j + spatialExtent - 1
 					);
+					// find position of max value within the mapped region
 					int[] maxPosition = mappedRegion.findPositionOfMax();
+					// convert the position to that in the input
+					maxPosition[0] += stride * i;
+					maxPosition[1] += stride * j;
 					double max = mappedRegion.get( maxPosition[0], maxPosition[1] );
 					output[k].set( i, j, max );
 					// (i,j) takes value from ( maxPosition[0], maxPosition[1] )
@@ -48,6 +52,10 @@ public class MaxPoolingLayer extends Layer {
 					);
 				}
 			}
+		}
+		System.out.println("max pooling map");
+		for ( Position k : maxPositions.keySet() ) {
+			System.out.println( k + " ==> " + maxPositions.get(k) );
 		}
 		return output;
 	}
@@ -76,6 +84,8 @@ public class MaxPoolingLayer extends Layer {
 				}
 			}
 		}
+		System.out.println("max pooling propagated error:");
+		Utilities.print3DMatrix( propagatedError );
 		return propagatedError;
 	}
 
