@@ -16,20 +16,17 @@ public class ConvolutionalNeuralNetwork {
 	}
 
 
-	public void forwardPropagation( Matrix[] input ) {
+	public double[] forwardPropagation( Matrix[] input ) {
 		Matrix[] threeDimensionalInput = input;
-		Utilities.print3DMatrix( threeDimensionalInput );
+//		Utilities.print3DMatrix( threeDimensionalInput );
 		double[] oneDimensionalInput = null;
 		for ( int i = 0 ; i < layers.length ; i++ ) {
 			if ( layers[i] instanceof ConvolutionalLayer ) {
 				ConvolutionalLayer convLayer = (ConvolutionalLayer) layers[i];
 				convLayer.setInput( threeDimensionalInput );
-				if ( i == 0 ) {
-					setInitialWeightsForTesting();
-				}
 				convLayer.computeLinearCombinations();
 				threeDimensionalInput = convLayer.computeOutput();
-				Utilities.print3DMatrix( threeDimensionalInput );
+//				Utilities.print3DMatrix( threeDimensionalInput );
 			}
 			else if ( layers[i] instanceof MaxPoolingLayer ) {
 				MaxPoolingLayer maxPool = (MaxPoolingLayer) layers[i];
@@ -58,11 +55,12 @@ public class ConvolutionalNeuralNetwork {
 		System.out.println("final output: ");
 		Utilities.printArray( oneDimensionalInput );
 		System.out.println();
+		return oneDimensionalInput;
 	}
 
 
 	public void backwardPropagation( double[] target ) {
-		System.out.println("testing backpropagation:");
+//		System.out.println("testing backpropagation:");
 		double[] oneDimensionalError = null;
 		Matrix[] threeDimensionalError = null;
 
@@ -102,71 +100,70 @@ public class ConvolutionalNeuralNetwork {
 			else {
 				threeDimensionalError = layers[i].propagateThreeDimensionalError();
 			}
-
 		}
 
-		for ( int i = layers.length - 1 ; i >= 0 ; i-- ) {
-			if ( layers[i] instanceof FullyConnectedLayer ) {
-				System.out.println("delta at layer " + i + ":");
-				Utilities.printArray( ((FullyConnectedLayer) layers[i]).delta );
-				System.out.println("gradients at layer " + i + ":");
-				for ( double[] mat : ((FullyConnectedLayer) layers[i]).gradients ) {
-					Utilities.printArray( mat );
-					System.out.println("&&&");
-				}
-
-				System.out.println();
-			}
-			else if ( layers[i] instanceof ConvolutionalLayer ) {
-				System.out.println("delta at layer " + i + ":");
-				Utilities.print3DMatrix( ((ConvolutionalLayer) layers[i]).delta );
-				System.out.println("gradients at layer " + i + ":");
-				((ConvolutionalLayer) layers[i]).printGradients();
-				System.out.println();
-			}
-		}
+//		for ( int i = layers.length - 1 ; i >= 0 ; i-- ) {
+//			if ( layers[i] instanceof FullyConnectedLayer ) {
+//				System.out.println("delta at layer " + i + ":");
+//				Utilities.printArray( ((FullyConnectedLayer) layers[i]).delta );
+//				System.out.println("gradients at layer " + i + ":");
+//				for ( double[] mat : ((FullyConnectedLayer) layers[i]).gradients ) {
+//					Utilities.printArray( mat );
+//					System.out.println("&&&");
+//				}
+//
+//				System.out.println();
+//			}
+//			else if ( layers[i] instanceof ConvolutionalLayer ) {
+//				System.out.println("delta at layer " + i + ":");
+//				Utilities.print3DMatrix( ((ConvolutionalLayer) layers[i]).delta );
+//				System.out.println("gradients at layer " + i + ":");
+//				((ConvolutionalLayer) layers[i]).printGradients();
+//				System.out.println();
+//			}
+//		}
 	}
 
 
-	private void setInitialWeightsForTesting() {
-		((ConvolutionalLayer) layers[0]).setFilters(
-				new double[][][][] {
-                        new double[][][] {
-                                new double[][] {
-                                        new double[]{1,1,1},
-                                        new double[]{1,1,1},
-                                        new double[]{1,1,1}
-                                },
-                                new double[][] {
-                                        new double[]{0,-1,0},
-                                        new double[]{0,1,1},
-                                        new double[]{-1,1,-1}
-                                },
-                                new double[][] {
-                                        new double[]{1,0,1},
-                                        new double[]{-1,1,0},
-                                        new double[]{-1,1,1}
-                                }
-                        },
-                        new double[][][] {
-                                new double[][] {
-                                        new double[]{1,1,0},
-                                        new double[]{0,0,-1},
-                                        new double[]{0,0,1}
-                                },
-                                new double[][] {
-                                        new double[]{-1,0,-1},
-                                        new double[]{-1,1,-1},
-                                        new double[]{-1,0,1}
-                                },
-                                new double[][] {
-                                        new double[]{1,1,-1},
-                                        new double[]{-1,1,1},
-                                        new double[]{1,1,0}
-                                }
-                        }
-                }
-		);
-	}
+//	private void setInitialWeightsForTesting() {
+//		((ConvolutionalLayer) layers[0]).setFilters(
+//				new double[][][][] {
+//                        new double[][][] {
+//                                new double[][] {
+//                                        new double[]{1,1,1},
+//                                        new double[]{1,1,1},
+//                                        new double[]{1,1,1}
+//                                },
+//                                new double[][] {
+//                                        new double[]{0,-1,0},
+//                                        new double[]{0,1,1},
+//                                        new double[]{-1,1,-1}
+//                                },
+//                                new double[][] {
+//                                        new double[]{1,0,1},
+//                                        new double[]{-1,1,0},
+//                                        new double[]{-1,1,1}
+//                                }
+//                        },
+//                        new double[][][] {
+//                                new double[][] {
+//                                        new double[]{1,1,0},
+//                                        new double[]{0,0,-1},
+//                                        new double[]{0,0,1}
+//                                },
+//                                new double[][] {
+//                                        new double[]{-1,0,-1},
+//                                        new double[]{-1,1,-1},
+//                                        new double[]{-1,0,1}
+//                                },
+//                                new double[][] {
+//                                        new double[]{1,1,-1},
+//                                        new double[]{-1,1,1},
+//                                        new double[]{1,1,0}
+//                                }
+//                        }
+//                }
+//		);
+//	}
 
 }

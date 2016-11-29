@@ -181,10 +181,10 @@ public class ConvolutionalLayer extends Layer {
 	}
 
 
-	public void printGradients() {
-		for ( int i = 0 ; i < filters.length ; i++ ) {
-			Utilities.print3DMatrix( filters[i].gradients );
-		}
-	}
+//	public void printGradients() {
+//		for ( int i = 0 ; i < filters.length ; i++ ) {
+//			Utilities.print3DMatrix( filters[i].gradients );
+//		}
+//	}
 
 }

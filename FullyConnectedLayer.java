@@ -27,8 +27,8 @@ public class FullyConnectedLayer extends Layer {
 			for ( int j = 0 ; j < weights[i].length ; j++ ) {
 				weights[i][j] = Utilities.getRandomNumberInRange( -1, 1 );
 			}
-			System.out.println("weights at " + i + " is: " );
-			Utilities.printArray( weights[i] );
+//			System.out.println("weights at " + i + " is: " );
+//			Utilities.printArray( weights[i] );
 		}
 		initializeGradients();
 	}
@@ -69,8 +69,8 @@ public class FullyConnectedLayer extends Layer {
 				}
 			}
 		}
-		System.out.println( "linear combination is: " );
-		Utilities.printArray( linearCombinations );
+//		System.out.println( "linear combination is: " );
+//		Utilities.printArray( linearCombinations );
 	}
 
 
@@ -203,10 +203,10 @@ public class FullyConnectedLayer extends Layer {
 				}
 			}
 		}
-		System.out.println("final layer delta");
-		Utilities.printArray( delta );
-		System.out.println("3d propapagated:" );
-		Utilities.print3DMatrix( error );
+//		System.out.println("final layer delta");
+//		Utilities.printArray( delta );
+//		System.out.println("3d propapagated:" );
+//		Utilities.print3DMatrix( error );
 		return error;
 	}
 }
