@@ -1,4 +1,7 @@
 import Jama.Matrix;
+
+import javax.swing.*;
+
 /**
  * Class that represents a fully connected layer in a feedforward or convolution NN.
  */
@@ -109,15 +112,16 @@ public class FullyConnectedLayer extends Layer {
 
 
 	public void computeNodeDeltasForOutputLayer( double[] target, int lossFunctionType ) {
+		double[] output = computeOutput();
 		if ( lossFunctionType == LossFunction.MSE ) {
 			for ( int i = 0 ; i < delta.length ; i++ ) {
-				delta[i] = (target[i] - ActivationFunctions.applyActivationFunction(activationFunction, linearCombinations[i])) *
+				delta[i] = (target[i] - output[i]) *
 						ActivationFunctions.applyActivationFunctionDerivative( activationFunction, linearCombinations[i] );
 			}
 		}
 		else if ( lossFunctionType == LossFunction.LOG_LOSS ) {
 			for ( int i = 0 ; i < delta.length ; i++ ) {
-				delta[i] = (target[i] - ActivationFunctions.applyActivationFunction( activationFunction, linearCombinations[i]));
+				delta[i] = (target[i] - output[i]);
 			}
 		}
 		else {
