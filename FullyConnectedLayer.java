@@ -8,6 +8,8 @@ import javax.swing.*;
 public class FullyConnectedLayer extends Layer {
 
 	double[][] weights;
+    double[] biasWeights;
+    double[] biasGradients;
 	double[] oneDimensionalInput;
 
 	double[] linearCombinations;
@@ -22,7 +24,8 @@ public class FullyConnectedLayer extends Layer {
 	}
 
 	/*********************** FEEDFORWARD ***********************/
-	public void initializeWeights() {
+
+	public void initializeWeightsAndGradients() {
 		for ( int i = 0 ; i < weights.length ; i++ ) {
 			for ( int j = 0 ; j < weights[i].length ; j++ ) {
 				weights[i][j] = Utilities.getRandomNumberInRange( -1, 1 );
@@ -30,27 +33,29 @@ public class FullyConnectedLayer extends Layer {
 //			System.out.println("weights at " + i + " is: " );
 //			Utilities.printArray( weights[i] );
 		}
-		initializeGradients();
+        gradients = new double[weights.length][weights[0].length];
+
+        biasWeights = new double[delta.length];
+        biasGradients = new double[delta.length];
+        for ( int i = 0 ; i < biasWeights.length ; i++ ) {
+            biasWeights[i] = Utilities.getRandomNumberInRange( -1, 1 );
+        }
 	}
 
-
-	private void initializeGradients() {
-		gradients = new double[weights.length][weights[0].length];
-	}
 
 
 	public void setInput( Matrix[] input ) {
 		this.input = input;
 		int totalInputNeuronNumber = input.length * input[0].getRowDimension() * input[0].getColumnDimension();
 		weights = new double[delta.length][totalInputNeuronNumber];
-		initializeWeights();
+		initializeWeightsAndGradients();
 	}
 
 
 	public void setInput( double[] input ) {
 		oneDimensionalInput = input;
 		weights = new double[delta.length][input.length];
-		initializeWeights();
+		initializeWeightsAndGradients();
 	}
 
 
@@ -67,6 +72,7 @@ public class FullyConnectedLayer extends Layer {
 				for ( int j = 0 ; j < oneDimensionalInput.length ; j++ ) {
 					linearCombinations[i] += oneDimensionalInput[j] * weights[i][j];
 				}
+				linearCombinations[i] += biasWeights[i];
 			}
 		}
 //		System.out.println( "linear combination is: " );
@@ -97,7 +103,7 @@ public class FullyConnectedLayer extends Layer {
 				}
 			}
 		}
-		return output;
+		return output + biasWeights[neuronIndex];
 	}
 
 
@@ -133,10 +139,12 @@ public class FullyConnectedLayer extends Layer {
 	public void computeGradients() {
 		for ( int i = 0 ; i < weights.length ; i++ ) {
 			for ( int j = 0 ; j < weights[i].length ; j++ ) {
-				double gradient = delta[i] * getInputBeforeFlattened( j );
-				gradients[i][j] += gradient;
+				gradients[i][j] += delta[i] * getInputBeforeFlattened( j );
 			}
 		}
+		for ( int i = 0 ; i < biasGradients.length ; i++ ) {
+            biasGradients[i] += delta[i];
+        }
 	}
 
 
@@ -147,6 +155,9 @@ public class FullyConnectedLayer extends Layer {
 				weights[i][j] += gradients[i][j];
 			}
 		}
+		for ( int i = 0 ; i < biasWeights.length ; i++ ) {
+            biasWeights[i] += biasGradients[i];
+        }
 		clearData();
 	}
 
@@ -156,6 +167,7 @@ public class FullyConnectedLayer extends Layer {
 		oneDimensionalInput = null;
 		linearCombinations = new double[linearCombinations.length];
         gradients = new double[gradients.length][gradients[0].length];
+        biasGradients = new double[biasGradients.length];
 	}
 
 
