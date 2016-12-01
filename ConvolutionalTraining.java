@@ -29,7 +29,7 @@ public class ConvolutionalTraining {
 
 
     public double iterate( int iterationNumber, double[] inputs, double[] targets ) {
-        double[] outputs = network.forwardPropagation( Utilities.convert1DTo3D(inputs) );
+        double[] outputs = network.forwardPropagation( Utilities.convert1DTo3D(inputs, 28) );
         Utilities.printArray( outputs );
         network.backwardPropagation( targets );
         return LossFunction.crossEntropyError( outputs, targets );
@@ -40,7 +40,7 @@ public class ConvolutionalTraining {
         double[] compares = new double[inputs.length];
         assert( inputs.length == targets.length );
         for ( int i = 0 ; i < inputs.length ; i++ ) {
-            double[] outputs = network.forwardPropagation( Utilities.convert1DTo3D(inputs[i]) );
+            double[] outputs = network.forwardPropagation( Utilities.convert1DTo3D(inputs[i], 28) );
             System.out.println("output is:");
             Utilities.printArray( outputs );
             System.out.println();

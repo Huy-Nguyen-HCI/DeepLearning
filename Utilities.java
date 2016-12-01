@@ -30,10 +30,14 @@ public class Utilities {
 	}
 
 
-	public static Matrix[] convert1DTo3D( double[] array ) {
+	public static Matrix[] convert1DTo3D( double[] array, int size ) {
+		assert size * size == array.length;
 		Matrix[] result = new Matrix[1];
-		result[0] = new Matrix(1, array.length);
-		result[0].setRow( 0, array );
+		result[0] = new Matrix(size, size);
+		for ( int i = 0 ; i < array.length ; i += size ) {
+			double[] row = Arrays.copyOfRange( array, i, i + size );
+			result[0].setRow( i/size, row );
+		}
 		return result;
 	}
 
