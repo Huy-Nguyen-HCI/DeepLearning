@@ -1,5 +1,5 @@
 import Jama.Matrix;
-
+import java.util.Arrays;
 import javax.swing.*;
 
 /**
@@ -64,6 +64,7 @@ public class FullyConnectedLayer extends Layer {
 
 
 	public void computeLinearCombinations() {
+        Arrays.fill( linearCombinations, 0 );
 		// if input is a 3D matrix
 		if ( input != null && oneDimensionalInput == null ) {
 			for ( int i = 0 ; i < linearCombinations.length ; i++ ) {
