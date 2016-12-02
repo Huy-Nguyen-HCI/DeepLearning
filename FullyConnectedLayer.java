@@ -87,7 +87,7 @@ public class FullyConnectedLayer extends Layer {
 
 	public double[] computeOutput() {
 		if ( activationFunction == ActivationFunctions.SOFTMAX ) {
-			return ActivationFunctions.softmaxAF( linearCombinations );
+			return ActivationFunctions.softmaxAF( Utilities.normalize(linearCombinations) );
 		}
 		double[] outputs = new double[linearCombinations.length];
 		for ( int i = 0 ; i < linearCombinations.length ; i++ ) {
