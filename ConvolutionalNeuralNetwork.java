@@ -30,11 +30,13 @@ public class ConvolutionalNeuralNetwork {
                 convLayer.computeLinearCombinations();
                 threeDimensionalInput = convLayer.computeOutput();
 //				Utilities.print3DMatrix( threeDimensionalInput );
+//                System.out.println("output dimension: " + threeDimensionalInput[0].getRowDimension() );
             } else if (layers[i] instanceof MaxPoolingLayer) {
                 MaxPoolingLayer maxPool = (MaxPoolingLayer) layers[i];
                 maxPool.setInput(threeDimensionalInput);
                 threeDimensionalInput = maxPool.computeOutput();
 //				Utilities.print3DMatrix( threeDimensionalInput );
+//                System.out.println("output dimension: " + threeDimensionalInput[0].getRowDimension() );
             } else {
                 assert (layers[i] instanceof FullyConnectedLayer);
                 FullyConnectedLayer fullLayer = (FullyConnectedLayer) layers[i];
@@ -55,6 +57,11 @@ public class ConvolutionalNeuralNetwork {
 //        System.out.println("final output: ");
 //        Utilities.printArray(oneDimensionalInput);
 //        System.out.println();
+//        int i = 1;
+//        System.out.println("input at layer " + i );
+////        Utilities.print3DMatrix(((FullyConnectedLayer) layers[i]).input );
+////        Utilities.printArray(((FullyConnectedLayer) layers[i]).oneDimensionalInput );
+//        Utilities.print3DMatrix((layers[i]).input );
         return oneDimensionalInput;
     }
 

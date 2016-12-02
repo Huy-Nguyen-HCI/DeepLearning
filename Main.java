@@ -41,7 +41,7 @@ public class Main {
 
 
     public static void main(String[] args) {
-        double[][] data = Utilities.readFile("mnist_train.csv");
+        double[][] data = Utilities.readFile("mnist_mini.csv");
         double[][] inputs = getPixels( data );
         double[][] targets = getLabels( data );
 
@@ -51,10 +51,10 @@ public class Main {
         training.stochasticTraining( inputs, targets );
 
 
-        data = Utilities.readFile("mnist_test.csv");
-        inputs = getPixels( data );
-        targets = getLabels( data );
-        training.test( inputs, targets );
+//        data = Utilities.readFile("mnist_test.csv");
+//        inputs = getPixels( data );
+//        targets = getLabels( data );
+//        training.test( inputs, targets );
     }
 
 
