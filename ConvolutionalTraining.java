@@ -13,33 +13,32 @@ public class ConvolutionalTraining {
     }
 
 
-//    public void stochasticTraining( double[][] inputs, double[][] targets ) {
-//        double[] error = new double[batchSize];
-//        for ( int j = 0 ; j < numberOfIterations ; j++ ) {
-//            System.out.println("&&& ITERATION " + j);
-//            int[] indices = Utilities.generateRandomNumbers( 0, inputs.length, batchSize );
-//            for ( int i = 0 ; i < indices.length ; i++ ) {
-//                error[i] = iterate( i, inputs[indices[i]], targets[indices[i]] );
-//            }
-//            network.updateWeights( batchSize );
-//            System.out.println("error at iteration " + j);
-//            System.out.println( Utilities.findAverage(error) );
-//        }
-//    }
-
-
     public void stochasticTraining( double[][] inputs, double[][] targets ) {
-        iterate( 0, inputs[0], targets[0] );
-        iterate( 0, inputs[0], targets[0] );
+        double[] error = new double[batchSize];
+        for ( int j = 0 ; j < numberOfIterations ; j++ ) {
+            System.out.println("&&& ITERATION " + j);
+            int[] indices = Utilities.generateRandomNumbers( 0, inputs.length, batchSize );
+            for ( int i = 0 ; i < indices.length ; i++ ) {
+                error[i] = iterate( i, inputs[indices[i]], targets[indices[i]] );
+            }
+            network.updateWeights( batchSize );
+            System.out.println("error at iteration " + j);
+            System.out.println( Utilities.getMean(error) );
+        }
     }
+
+
+//    public void stochasticTraining( double[][] inputs, double[][] targets ) {
+//        iterate( 0, inputs[0], targets[0] );
+//        iterate( 0, inputs[0], targets[0] );
+//    }
 
 
     public double iterate( int iterationNumber, double[] inputs, double[] targets ) {
         double[] outputs = network.forwardPropagation( Utilities.convert1DTo3D(inputs, 28) );
         Utilities.printArray( outputs );
-//        network.backwardPropagation( targets );
-//        return LossFunction.crossEntropyError( outputs, targets );
-        return 0;
+        network.backwardPropagation( targets );
+        return LossFunction.crossEntropyError( outputs, targets );
     }
 
 
