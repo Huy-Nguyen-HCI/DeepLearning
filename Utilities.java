@@ -211,30 +211,30 @@ public class Utilities {
 		for ( double x : data ) sum += x;
 		return sum / data.length;
 	}
+//
+//
+//	public static double getVariance( double[] data ) {
+//		double mean = getMean(data);
+//		double temp = 0;
+//		for(double a :data)
+//			temp += (a-mean)*(a-mean);
+//		return temp/data.length;
+//	}
 
 
-	public static double getVariance( double[] data ) {
-		double mean = getMean(data);
-		double temp = 0;
-		for(double a :data)
-			temp += (a-mean)*(a-mean);
-		return temp/data.length;
-	}
+//	public static double getStdDev( double[] data ) {
+//		return Math.sqrt(getVariance(data));
+//	}
 
 
-	public static double getStdDev( double[] data ) {
-		return Math.sqrt(getVariance(data));
-	}
-
-
-	public static double[] normalize( double[] data ) {
-		double mean = getMean(data);
-		double std = getStdDev(data);
-		double[] result = new double[data.length];
-		for ( int i = 0 ; i < result.length ; i++ ) {
-			result[i] = (data[i] - mean) / std;
-		}
-		return result;
-	}
+//	public static double[] normalize( double[] data ) {
+//		double mean = getMean(data);
+//		double std = getStdDev(data);
+//		double[] result = new double[data.length];
+//		for ( int i = 0 ; i < result.length ; i++ ) {
+//			result[i] = (data[i] - mean) / std;
+//		}
+//		return result;
+//	}
 
 }

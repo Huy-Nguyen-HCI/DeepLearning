@@ -29,14 +29,21 @@ public class ConvolutionalTraining {
 
 
 //    public void stochasticTraining( double[][] inputs, double[][] targets ) {
-//        iterate( 0, inputs[0], targets[0] );
-//        iterate( 0, inputs[0], targets[0] );
+//        double[] error = new double[batchSize];
+//        for ( int j = 0 ; j < numberOfIterations ; j++ ) {
+//            System.out.println("&&& ITERATION " + j);
+//            for (int i = 0; i < batchSize; i++) {
+//                error[i] = iterate(i, inputs[1], targets[1]);
+//            }
+//            network.updateWeights(batchSize);
+//            System.out.println("error at iteration " + j);
+//            System.out.println(Utilities.getMean(error));
+//        }
 //    }
 
 
     public double iterate( int iterationNumber, double[] inputs, double[] targets ) {
         double[] outputs = network.forwardPropagation( Utilities.convert1DTo3D(inputs, 28) );
-        Utilities.printArray( outputs );
         network.backwardPropagation( targets );
         return LossFunction.crossEntropyError( outputs, targets );
     }

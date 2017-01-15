@@ -28,7 +28,7 @@ public class FullyConnectedLayer extends Layer {
 	public void initializeWeightsAndGradients() {
 		for ( int i = 0 ; i < weights.length ; i++ ) {
 			for ( int j = 0 ; j < weights[i].length ; j++ ) {
-				weights[i][j] = Utilities.getRandomNumberInRange( -1, 1 );
+				weights[i][j] = Utilities.getRandomNumberInRange( -0.0005, 0.0005 );
 			}
 //			System.out.println("weights at " + i + " is: " );
 //			Utilities.printArray( weights[i] );
@@ -38,7 +38,7 @@ public class FullyConnectedLayer extends Layer {
         biasWeights = new double[delta.length];
         biasGradients = new double[delta.length];
         for ( int i = 0 ; i < biasWeights.length ; i++ ) {
-            biasWeights[i] = Utilities.getRandomNumberInRange( -1, 1 );
+            biasWeights[i] = Utilities.getRandomNumberInRange( -0.0005, 0.0005 );
         }
 	}
 
@@ -87,7 +87,7 @@ public class FullyConnectedLayer extends Layer {
 
 	public double[] computeOutput() {
 		if ( activationFunction == ActivationFunctions.SOFTMAX ) {
-			return ActivationFunctions.softmaxAF( Utilities.normalize(linearCombinations) );
+			return ActivationFunctions.softmaxAF( linearCombinations );
 		}
 		double[] outputs = new double[linearCombinations.length];
 		for ( int i = 0 ; i < linearCombinations.length ; i++ ) {

@@ -18,7 +18,7 @@ public class Filter {
             weights[i] = new Matrix(filterSize, filterSize);
             for ( int row = 0 ; row < filterSize ; row++ ) {
                 for ( int column = 0 ; column < filterSize ; column++ ) {
-                    weights[i].set( row, column, Utilities.getRandomNumberInRange(-1,1) );
+                    weights[i].set( row, column, Utilities.getRandomNumberInRange(-0.0005, 0.0005) );
                 }
             }
         }

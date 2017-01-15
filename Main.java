@@ -51,10 +51,10 @@ public class Main {
         training.stochasticTraining( inputs, targets );
 
 
-//        data = Utilities.readFile("mnist_test.csv");
-//        inputs = getPixels( data );
-//        targets = getLabels( data );
-//        training.test( inputs, targets );
+        data = Utilities.readFile("mnist_test.csv");
+        inputs = getPixels( data );
+        targets = getLabels( data );
+        training.test( inputs, targets );
     }
 
 
