@@ -3,8 +3,7 @@ package convolution; /**
  */
 import core.Network;
 import core.Task;
-import layer.Layer;
-import layer.Size;
+import layer.*;
 import utilities.Utilities;
 import data.Dataset;
 import data.Record;
@@ -46,35 +45,38 @@ public class ConvolutionalTraining implements Serializable {
             int inputDepth = previous.getOutputDepth();
 
             switch ( layer.getType() ) {
-                case Layer.INPUT:
+                case INPUT:
                     break;
-                case Layer.CONV:
+                case CONV:
                     // set the size of the 3D input
                     // assume stride of 1
+                    ConvolutionalLayer convLayer = (ConvolutionalLayer) layer;
                     Size inputSize = previous.getOutputSize();
-                    Size filterSize = layer.getFilterSize();
+                    Size filterSize = convLayer.getFilterSize();
                     Size outputSize = new Size(inputSize.getX() - filterSize.getX() + 1, inputSize.getY() - filterSize.getY() + 1);
-                    layer.setOutputSize( outputSize );
-                    layer.initFilters( inputDepth );
-                    layer.initBias();
-                    layer.initErrors( batchSize );
-                    layer.initOutmaps( batchSize );
+                    convLayer.setOutputSize( outputSize );
+                    convLayer.initFilters( inputDepth );
+                    convLayer.initBias();
+                    convLayer.initErrors( batchSize );
+                    convLayer.initOutmaps( batchSize );
                     break;
-                case Layer.MAXPOOL:
+                case MAXPOOL:
+                    MaxpoolingLayer maxpoolingLayer = (MaxpoolingLayer) layer;
                     // output and input have same depth
-                    layer.setOutputDepth( inputDepth );
+                    maxpoolingLayer.setOutputDepth( inputDepth );
                     // output size = input size / pooling size
                     Size out = previous.getOutputSize();
-                    Size poolingSize = layer.getPoolingSize();
-                    layer.setOutputSize( new Size(out.getX() / poolingSize.getX(), out.getY() / poolingSize.getY()) );
-                    layer.initErrors( batchSize );
-                    layer.initOutmaps( batchSize );
+                    Size poolingSize = maxpoolingLayer.getPoolingSize();
+                    maxpoolingLayer.setOutputSize( new Size(out.getX() / poolingSize.getX(), out.getY() / poolingSize.getY()) );
+                    maxpoolingLayer.initErrors( batchSize );
+                    maxpoolingLayer.initOutmaps( batchSize );
                     break;
-                case Layer.OUTPUT:
-                    layer.initOutputFilters( inputDepth, previous.getOutputSize() );
-                    layer.initBias();
-                    layer.initErrors( batchSize );
-                    layer.initOutmaps( batchSize );
+                case OUTPUT:
+                    OutputLayer outLayer = (OutputLayer) layer;
+                    outLayer.initOutputFilters( inputDepth, previous.getOutputSize() );
+                    outLayer.initBias();
+                    outLayer.initErrors( batchSize );
+                    outLayer.initOutmaps( batchSize );
                     break;
                 default:
                     assert false : "Unrecognized layer type";
@@ -118,7 +120,6 @@ public class ConvolutionalTraining implements Serializable {
                 System.out.println( "new learning rate: " + learningRate );
             }
             System.out.println("Accuracy in training set: " + right + "/" + count + " = " + correctPercent );
-//            test( testset );
         }
     }
 
@@ -141,10 +142,12 @@ public class ConvolutionalTraining implements Serializable {
         for ( int i = 1 ; i < numberOfLayers ; i++ ) {
             Layer layer = layers.get(i);
             Layer previous = layers.get(i-1);
-            int layerType = layer.getType();
-            if ( layerType == Layer.CONV || layerType == Layer.OUTPUT ) {
-                updateFilters( layer, previous );
-                updateBias( layer, previous );
+            switch ( layer.getType() ) {
+                case CONV:
+                case OUTPUT:
+                    updateFilters( layer, previous );
+                    updateBias( layer, previous );
+                    break;
             }
         }
     }
@@ -160,13 +163,13 @@ public class ConvolutionalTraining implements Serializable {
             Layer layer = layers.get(l);
             Layer lastLayer = layers.get(l - 1);
             switch (layer.getType()) {
-                case Layer.CONV:
+                case CONV:
                     setConvOutput(layer, lastLayer);
                     break;
-                case Layer.MAXPOOL:
+                case MAXPOOL:
                     setMaxpoolingOutput(layer, lastLayer);
                     break;
-                case Layer.OUTPUT:
+                case OUTPUT:
                     setConvOutput(layer, lastLayer);
                     break;
                 default:
@@ -213,7 +216,7 @@ public class ConvolutionalTraining implements Serializable {
                     // apply sigmoid activation function
                     for ( int row = 0 ; row < sum.length ; row++ ) {
                         for ( int column = 0 ; column < sum[row].length ; column++ ) {
-                            sum[row][column] = Utilities.sigmod( sum[row][column] + bias );
+                            sum[row][column] = Utilities.sigmoid( sum[row][column] + bias );
                         }
                     }
                     layer.setMapValue( j, sum );
@@ -225,16 +228,18 @@ public class ConvolutionalTraining implements Serializable {
 
 
     private void setMaxpoolingOutput( Layer layer, Layer lastLayer ) {
+        ConvolutionalLayer previousLayer = (ConvolutionalLayer) lastLayer;
+        MaxpoolingLayer maxpoolingLayer = (MaxpoolingLayer) layer;
         int lastOutputDepth = lastLayer.getOutputDepth();
         new Task(lastOutputDepth) {
 
             @Override
             public void process(int start, int end) {
                 for (int i = start; i < end; i++) {
-                    double[][] lastMap = lastLayer.getMap(i);
-                    Size poolingSize = layer.getPoolingSize();
+                    double[][] lastMap = previousLayer.getMap(i);
+                    Size poolingSize = maxpoolingLayer.getPoolingSize();
                     double[][] sampMatrix = Utilities.scaleMatrix(lastMap, poolingSize);
-                    layer.setMapValue(i, sampMatrix);
+                    maxpoolingLayer.setMapValue(i, sampMatrix);
                 }
             }
 
@@ -317,12 +322,13 @@ public class ConvolutionalTraining implements Serializable {
         for ( int i = numberOfLayers - 2 ; i > 0 ; i -- ) {
             Layer layer = layers.get(i);
             Layer nextLayer = layers.get(i+1);
-            int type = layer.getType();
-            if ( type == Layer.MAXPOOL ) {
-                setMaxpoolError( layer, nextLayer );
-            }
-            else if ( type == Layer.CONV ) {
-                setConvError( layer, nextLayer );
+            switch ( layer.getType() ) {
+                case MAXPOOL:
+                    setMaxpoolError( layer, nextLayer );
+                    break;
+                case CONV:
+                    setConvError( layer, nextLayer );
+                    break;
             }
         }
     }
@@ -355,16 +361,17 @@ public class ConvolutionalTraining implements Serializable {
 
 
     private void setConvError( Layer layer, Layer nextLayer ) {
-        assert( nextLayer.getType() == Layer.MAXPOOL );
+        MaxpoolingLayer maxpoolingLayer = (MaxpoolingLayer) nextLayer;
+        ConvolutionalLayer convLayer = (ConvolutionalLayer) layer;
         int outputDepth = layer.getOutputDepth();
         new Task(outputDepth) {
 
             @Override
             public void process(int start, int end) {
                 for (int m = start; m < end; m++) {
-                    Size scale = nextLayer.getPoolingSize();
-                    double[][] nextError = nextLayer.getError(m);
-                    double[][] map = layer.getMap(m);
+                    Size scale = maxpoolingLayer.getPoolingSize();
+                    double[][] nextError = maxpoolingLayer.getError(m);
+                    double[][] map = convLayer.getMap(m);
                     double[][] outMatrix = Utilities.multiplyMatrix(
                             map,
                             Utilities.oneMinusMatrix(Utilities.cloneMatrix(map))
@@ -373,7 +380,7 @@ public class ConvolutionalTraining implements Serializable {
                             outMatrix,
                             Utilities.kronecker(nextError, scale)
                     );
-                    layer.setError(m, outMatrix);
+                    convLayer.setError(m, outMatrix);
                 }
             }
         }.start();
