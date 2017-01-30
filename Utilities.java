@@ -1,240 +1,321 @@
-import java.util.*;
-import Jama.Matrix;
-import java.io.*;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
 
 public class Utilities {
 
-	static Random rand = new Random();
 
-	public static double[][][] cloneArray( double[][][] array ) {
-		double[][][] cloned = new double[ array.length ][][];
-		for ( int i = 0 ; i < array.length ; i++ ) {
-			cloned[i] = new double[ array[i].length ][];
-			for ( int j = 0 ; j < array[i].length ; j++ ) {
-				cloned[i][j] = new double[ array[i][j].length ];
-				for ( int k = 0 ; k < array[i][j].length ; k++ ) {
-					cloned[i][j][k] = array[i][j][k];
-				}
+	private static Random r = new Random(2);
+
+	public static double[][] addMatrix( double[][] m1, double[][] m2 ) {
+		assert m1.length == m2.length && m1[0].length == m2[0].length : "Error: Dimensions must match";
+		for ( int i = 0 ; i < m1.length ; i++ ) {
+			for ( int j = 0 ; j < m1[i].length ; j++ ) {
+				m2[i][j] = m1[i][j] + m2[i][j];
 			}
 		}
-		return cloned;
+		return m2;
 	}
 
 
-	public static double[] cloneArray( double[] array ) {
-		double[] cloned = new double[ array.length ];
-		for ( int i = 0 ; i < array.length ; i++ ) {
-			cloned[i] = array[i];
-		}
-		return cloned;
-	}
-
-
-	public static Matrix[] convert1DTo3D( double[] array, int size ) {
-		assert size * size == array.length;
-		Matrix[] result = new Matrix[1];
-		result[0] = new Matrix(size, size);
-		for ( int i = 0 ; i < array.length ; i += size ) {
-			double[] row = Arrays.copyOfRange( array, i, i + size );
-			result[0].setRow( i/size, row );
-		}
-		return result;
-	}
-
-
-	public static void printArray(double[] arr) {
-		System.out.println("*****");
-		for ( double x : arr ) System.out.print(x + " ");
-		System.out.println("\n*****");
-	}
-
-
-	public static void printArray(double[][][] arr) {
-		Matrix[] mats = new Matrix[arr.length];
-		for ( int i = 0 ; i < arr.length ; i++ ) {
-			mats[i] = new Matrix( arr[i] );
-		}
-		print3DMatrix( mats );
-	}
-
-
-	public static double getRandomNumberInRange( double start, double end ) {
-		double random = new Random().nextDouble();
-        random = Math.round(random * 100.0) / 100.0;
-        return start + (random * (end - start));
-	}
-
-
-	public static Matrix[] create3DBias( double value ) {
-		Matrix[] bias = new Matrix[1];
-		bias[0] = new Matrix( new double[][]{new double[]{value}} );
-		return bias;
-	}
-
-
-
-	public static Matrix[] createMatrixWithSameDimension( Matrix[] input ) {
-		Matrix[] output = new Matrix[input.length];
-		for ( int k = 0 ; k < input.length ; k++ ) {
-			if ( input[k] == null ) System.out.println(k);
-			output[k] = new Matrix( input[k].getRowDimension(), input[k].getColumnDimension() );
-		}
-		return output;
-	}
-
-
-	public static boolean matricesHaveSameDimension( Matrix[] a, Matrix[] b ) {
-		if ( a.length != b.length ) return false;
-		for ( int i = 0 ; i < a.length ; i++ ) {
-			if (a[i].getRowDimension() != b[i].getRowDimension() ||
-					a[i].getColumnDimension() != b[i].getColumnDimension())
-				return false;
-		}
-		return true;
-	}
-
-
-	public static void print3DMatrix( Matrix[] matrix ) {
-		for ( int k = 0 ; k < matrix.length ; k++ ) {
-			for ( int i = 0 ; i < matrix[k].getRowDimension() ; i++ ) {
-				for ( int j = 0 ; j < matrix[k].getColumnDimension() ; j++ ) {
-					System.out.print( matrix[k].get(i,j) + " " );
-				}
-				System.out.println();
+	public static double[][] multiplyMatrix( double[][] m1, double[][] m2 ) {
+		double[][] out = new double[m1.length][m1[0].length];
+		for ( int i = 0 ; i < m1.length ; i++ ) {
+			for ( int j = 0 ; j < m1[i].length ; j++ ) {
+				out[i][j] = m1[i][j] * m2[i][j];
 			}
-			System.out.println("\n\n");
 		}
+		return m2;
 	}
 
 
-	public static double[][] readFile( String fileName ) {
-		System.out.println("start reading file " + fileName );
-		double[][] data = null;
-		Scanner sc = null;
-		try {
-			sc = new Scanner( new File(fileName) );
-			data = new double[ countLines(fileName) ][];
-			int lineIndex = 0;
-			while ( sc.hasNextLine() ) {
-				String line = sc.nextLine();
-				String[] split = line.split(",");
-				data[ lineIndex ] = new double[ split.length ];
-				for ( int i = 0 ; i < split.length ; i++ ) {
-					data[lineIndex][i] = Double.parseDouble( split[i] );
-				}
-				lineIndex ++;
+	public static double[][] oneMinusMatrix( double[][] m ) {
+		for ( int i = 0 ; i < m.length ; i++ ) {
+			for ( int j = 0 ; j < m[i].length ; j++ ) {
+				m[i][j] = 1 - m[i][j];
 			}
-
-		} catch ( IOException e ) {
-			e.printStackTrace();
 		}
-		finally {
-			sc.close();
-			System.out.println("Finish reading file" + fileName);
+		return m;
+	}
+
+
+	public static void printMatrix(double[][] matrix) {
+		for (int i = 0; i < matrix.length; i++) {
+			String line = Arrays.toString(matrix[i]);
+			line = line.replaceAll(", ", "\t");
+			System.out.println(line);
+		}
+		System.out.println();
+	}
+
+	/**
+	 * Swap the row and column of a square matrix.
+	 *
+	 * @param matrix
+	 */
+	public static double[][] rot180( double[][] matrix ) {
+		matrix = cloneMatrix(matrix);
+		int m = matrix.length;
+		int n = matrix[0].length;
+		for (int i = 0; i < m; i++) {
+			for (int j = 0; j < n / 2; j++) {
+				double tmp = matrix[i][j];
+				matrix[i][j] = matrix[i][n - 1 - j];
+				matrix[i][n - 1 - j] = tmp;
+			}
+		}
+		for (int j = 0; j < n; j++) {
+			for (int i = 0; i < m / 2; i++) {
+				double tmp = matrix[i][j];
+				matrix[i][j] = matrix[m - 1 - i][j];
+				matrix[m - 1 - i][j] = tmp;
+			}
+		}
+		return matrix;
+	}
+
+	/**
+	 * Generate a random matrix with the specified dimensions.
+	 *
+	 * @param x the matrix's row
+	 * @param y the matrix's column
+	 * @return a 2D array of random values.
+	 */
+	public static double[][] randomMatrix( int x, int y ) {
+		double[][] matrix = new double[x][y];
+		int tag = 1;
+		for (int i = 0; i < x; i++) {
+			for (int j = 0; j < y; j++) {
+				matrix[i][j] = (r.nextDouble() - 0.05) / 10;
+			}
+		}
+		return matrix;
+	}
+
+	/**
+	 * Generate a random array with specified length.
+	 *
+	 * @param len the array length
+	 * @return an array of random values.
+	 */
+	public static double[] randomArray(int len) {
+		double[] data = new double[len];
+		for (int i = 0; i < len; i++) {
+			data[i] = (r.nextDouble() - 0.05) / 10;
 		}
 		return data;
 	}
 
+	/**
+	 * Generate an array of random indices between 0 and the data set's size.
+	 *
+	 * @param size the data set's size.
+	 * @param batchSize the length of the generated array.
+	 * @return an array of indices.
+	 */
+	public static int[] randomPerm(int size, int batchSize) {
+		Set<Integer> set = new HashSet<Integer>();
+		while (set.size() < batchSize) {
+			set.add(r.nextInt(size));
+		}
+		int[] randPerm = new int[batchSize];
+		int i = 0;
+		for (Integer value : set)
+			randPerm[i++] = value;
+		return randPerm;
+	}
 
-	public static int countLines(String fileName) throws IOException {
-		InputStream is = new BufferedInputStream(new FileInputStream(fileName));
-		try {
-			byte[] c = new byte[1024];
-			int count = 0;
-			int readChars = 0;
-			boolean empty = true;
-			while ((readChars = is.read(c)) != -1) {
-				empty = false;
-				for (int i = 0; i < readChars; ++i) {
-					if (c[i] == '\n') {
-						++count;
+	/**
+	 * Create a copy of the input matrix.
+	 *
+	 * @param matrix the input matrix.
+	 * @return a copy.
+	 */
+	public static double[][] cloneMatrix(final double[][] matrix) {
+
+		final int m = matrix.length;
+		int n = matrix[0].length;
+		final double[][] outMatrix = new double[m][n];
+
+		for (int i = 0; i < m; i++) {
+			for (int j = 0; j < n; j++) {
+				outMatrix[i][j] = matrix[i][j];
+			}
+		}
+		return outMatrix;
+	}
+
+
+	/**
+	 * The Kronecker product between the matrix and the pooling map.
+	 */
+	public static double[][] kronecker(final double[][] matrix, Size scale) {
+		final int m = matrix.length;
+		int n = matrix[0].length;
+		final double[][] outMatrix = new double[m * scale.x][n * scale.y];
+
+		for (int i = 0; i < m; i++) {
+			for (int j = 0; j < n; j++) {
+				for (int ki = i * scale.x; ki < (i + 1) * scale.x; ki++) {
+					for (int kj = j * scale.y; kj < (j + 1) * scale.y; kj++) {
+						outMatrix[ki][kj] = matrix[i][j];
 					}
 				}
 			}
-			return (count == 0 && !empty) ? 1 : count;
-		} finally {
-			is.close();
 		}
+		return outMatrix;
+	}
+
+	/**
+	 * Apply mean sampling on an input matrix.
+	 *
+	 * @param matrix
+	 * @param scaleSize
+	 * @return
+	 */
+	public static double[][] scaleMatrix(final double[][] matrix,
+										 final Size scale) {
+		int m = matrix.length;
+		int n = matrix[0].length;
+		final int sm = m / scale.x;
+		final int sn = n / scale.y;
+		final double[][] outMatrix = new double[sm][sn];
+		if (sm * scale.x != m || sn * scale.y != n)
+			throw new RuntimeException("scales do not match");
+		final int size = scale.x * scale.y;
+		for (int i = 0; i < sm; i++) {
+			for (int j = 0; j < sn; j++) {
+				double sum = 0.0;
+				for (int si = i * scale.x; si < (i + 1) * scale.x; si++) {
+					for (int sj = j * scale.y; sj < (j + 1) * scale.y; sj++) {
+						sum += matrix[si][sj];
+					}
+				}
+				outMatrix[i][j] = sum / size;
+			}
+		}
+		return outMatrix;
+	}
+
+	/**
+	 * Pad the input matrix then perform convolution on it using the input filter.
+	 *
+	 * @param matrix
+	 * @param filter
+	 * @return
+	 */
+	public static double[][] convnFull(double[][] matrix, double[][] filter) {
+		int m = matrix.length;
+		int n = matrix[0].length;
+		final int km = filter.length;
+		final int kn = filter[0].length;
+		// À©Õ¹¾ØÕó
+		final double[][] extendMatrix = new double[m + 2 * (km - 1)][n + 2
+				* (kn - 1)];
+		for (int i = 0; i < m; i++) {
+			for (int j = 0; j < n; j++)
+				extendMatrix[i + km - 1][j + kn - 1] = matrix[i][j];
+		}
+		return convnValid(extendMatrix, filter);
+	}
+
+	/**
+	 * Perform convolution on the input matrix using the input filter.
+	 *
+	 * @param matrix
+	 * @param filter
+	 * @return
+	 */
+	public static double[][] convnValid(final double[][] matrix,
+										double[][] filter) {
+		int m = matrix.length;
+		int n = matrix[0].length;
+		final int km = filter.length;
+		final int kn = filter[0].length;
+		int kns = n - kn + 1;
+		final int kms = m - km + 1;
+		// ½á¹û¾ØÕó
+		final double[][] outMatrix = new double[kms][kns];
+
+		for (int i = 0; i < kms; i++) {
+			for (int j = 0; j < kns; j++) {
+				double sum = 0.0;
+				for (int ki = 0; ki < km; ki++) {
+					for (int kj = 0; kj < kn; kj++)
+						sum += matrix[i + ki][j + kj] * filter[ki][kj];
+				}
+				outMatrix[i][j] = sum;
+
+			}
+		}
+		return outMatrix;
+
 	}
 
 
-	public static boolean compareArrays( double[][] arr1, double[][] arr2 ) {
-		if ( arr1.length != arr2.length )
-			return false;
-		for ( int i = 0 ; i < arr1.length ; i++ ) {
-			if ( !Arrays.equals( arr1[i], arr2[i] ) )
-				return false;
-		}
-		return true;
+	public static double sigmod(double x) {
+		return 1 / (1 + Math.pow(Math.E, -x));
 	}
 
 
-	public static double calculateAccuracy( double[] outputs, double[] targets ) {
-		assert( targets.length == outputs.length );
-		int numberOfMatches = 0;
-		for ( int i = 0 ; i < outputs.length ; i++ ) {
-			numberOfMatches += ( outputs[i] == targets[i] ) ? 1 : 0;
+	/**
+	 * Calculate the sum of all values in a matrix.
+	 *
+	 * @param error
+	 * @return
+	 */
+
+	public static double sum(double[][] matrix) {
+		int m = matrix.length;
+		int n = matrix[0].length;
+		double sum = 0.0;
+		for (int i = 0; i < m; i++) {
+			for (int j = 0; j < n; j++) {
+				sum += matrix[i][j];
+			}
 		}
-		return numberOfMatches * 1.0 / outputs.length;
+		return sum;
 	}
 
-
-	public static int[] generateRandomNumbers( int min, int max, int length ) {
-		HashSet<Integer> set = new HashSet<Integer>();
-		while ( set.size() < length ) {
-			set.add( rand.nextInt(max) + min );
-		}
-		int[] result = new int[length];
-		int count = 0;
-		for ( int x : set ) {
-			result[count++] = x;
+	/**
+	 * Sum all the values of the 3D matrix at column j of the input 4D matrix.
+	 *
+	 * @param errors
+	 * @param j
+	 * @return
+	 */
+	public static double[][] sum(double[][][][] errors, int j) {
+		int m = errors[0][j].length;
+		int n = errors[0][j][0].length;
+		double[][] result = new double[m][n];
+		for (int mi = 0; mi < m; mi++) {
+			for (int nj = 0; nj < n; nj++) {
+				double sum = 0;
+				for (int i = 0; i < errors.length; i++)
+					sum += errors[i][j][mi][nj];
+				result[mi][nj] = sum;
+			}
 		}
 		return result;
 	}
 
 
-	public static int findIndexOfMax( double[] arr ) {
+	/**
+	 * Get the index of the maximum number in an array.
+	 *
+	 * @param out
+	 * @return
+	 */
+	public static int getMaxIndex(double[] out) {
+		double max = out[0];
 		int index = 0;
-		double max = arr[0];
-		for ( int i = 0 ; i < arr.length ; i++ ) {
-			if ( arr[i] > max ) {
+		for (int i = 1; i < out.length; i++)
+			if (out[i] > max) {
+				max = out[i];
 				index = i;
-				max = arr[i];
 			}
-		}
 		return index;
 	}
-
-
-	public static double getMean( double[] data ) {
-		double sum = 0;
-		for ( double x : data ) sum += x;
-		return sum / data.length;
-	}
-//
-//
-//	public static double getVariance( double[] data ) {
-//		double mean = getMean(data);
-//		double temp = 0;
-//		for(double a :data)
-//			temp += (a-mean)*(a-mean);
-//		return temp/data.length;
-//	}
-
-
-//	public static double getStdDev( double[] data ) {
-//		return Math.sqrt(getVariance(data));
-//	}
-
-
-//	public static double[] normalize( double[] data ) {
-//		double mean = getMean(data);
-//		double std = getStdDev(data);
-//		double[] result = new double[data.length];
-//		for ( int i = 0 ; i < result.length ; i++ ) {
-//			result[i] = (data[i] - mean) / std;
-//		}
-//		return result;
-//	}
-
 }
