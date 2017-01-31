@@ -1,4 +1,4 @@
-import java.util.ArrayList;
+package utilities;
 
 public class ActivationFunctions {
 

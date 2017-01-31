@@ -5,6 +5,7 @@ import core.Network;
 import core.Task;
 import layer.*;
 import utilities.Utilities;
+import utilities.ActivationFunctions;
 import data.Dataset;
 import data.Record;
 
@@ -216,7 +217,7 @@ public class ConvolutionalTraining implements Serializable {
                     // apply sigmoid activation function
                     for ( int row = 0 ; row < sum.length ; row++ ) {
                         for ( int column = 0 ; column < sum[row].length ; column++ ) {
-                            sum[row][column] = Utilities.sigmoid( sum[row][column] + bias );
+                            sum[row][column] = ActivationFunctions.sigmoid( sum[row][column] + bias );
                         }
                     }
                     layer.setMapValue( j, sum );
