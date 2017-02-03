@@ -12,7 +12,7 @@ public class InputLayer extends Layer {
      */
     public InputLayer( Size outputSize ) {
         type = LayerType.INPUT;
-        // input is one channel of an image (ex: a 28 x 28 x 1 matrix), so numberOfFilters is 1
+        // input is one channel of an image (ex: a 28 x 28 x 1 matrix), so output depth is 1
         this.outputDepth = 1;
         setOutputSize( outputSize );
     }

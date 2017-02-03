@@ -276,11 +276,11 @@ public class Utilities {
 	}
 
 	/**
-	 * Sum all the values of the 3D matrix at column j of the input 4D matrix.
+	 * Sum all the 2D matrices at column j.
 	 *
-	 * @param errors
-	 * @param j
-	 * @return
+	 * @param errors the 4D matrix of errors.
+	 * @param j the column to sum.
+	 * @return a 2D matrix that is the sum of all matrices at column j.
 	 */
 	public static double[][] sum(double[][][][] errors, int j) {
 		int m = errors[0][j].length;
@@ -289,8 +289,9 @@ public class Utilities {
 		for (int mi = 0; mi < m; mi++) {
 			for (int nj = 0; nj < n; nj++) {
 				double sum = 0;
-				for (int i = 0; i < errors.length; i++)
+				for (int i = 0; i < errors.length; i++) {
 					sum += errors[i][j][mi][nj];
+				}
 				result[mi][nj] = sum;
 			}
 		}

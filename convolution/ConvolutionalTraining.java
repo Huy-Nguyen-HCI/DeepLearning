@@ -14,9 +14,13 @@ import java.io.Serializable;
 
 public class ConvolutionalTraining implements Serializable {
 
-    List<Layer> layers;
-    int numberOfLayers;
+    // the list of layers of the input network
+    final List<Layer> layers;
+    // the length of the list of layers, saved into a variable for convenience
+    final int numberOfLayers;
+    // the size of each training batch
     int batchSize;
+    // the constant that gets multiplied with gradient to determine weight delta
     double learningRate = 1.5;
 
     /**
@@ -28,15 +32,15 @@ public class ConvolutionalTraining implements Serializable {
         layers = network.getLayers();
         numberOfLayers = layers.size();
         this.batchSize = batchSize;
-        setup( batchSize );
+        setup();
     }
 
 
     /**
      * Sets up each layer based on the batch size.
-     * @param batchSize the size of each batch used in stochastic gradient descent.
+     * @param batchSize the size of each batch used in training.
      */
-    private void setup( int batchSize ) {
+    private void setup() {
         Layer inputLayer = layers.get(0);
         // initialize the array of 3D outputs for the input layer
         inputLayer.initOutmaps( batchSize );
@@ -49,11 +53,11 @@ public class ConvolutionalTraining implements Serializable {
                 case INPUT:
                     break;
                 case CONV:
-                    // set the size of the 3D input
-                    // assume stride of 1
+                    // set the size of the 3D input, assume stride of 1
                     ConvolutionalLayer convLayer = (ConvolutionalLayer) layer;
                     Size inputSize = previous.getOutputSize();
                     Size filterSize = convLayer.getFilterSize();
+                    // output size without padding
                     Size outputSize = new Size(inputSize.getX() - filterSize.getX() + 1, inputSize.getY() - filterSize.getY() + 1);
                     convLayer.setOutputSize( outputSize );
                     convLayer.initFilters( inputDepth );
@@ -94,6 +98,8 @@ public class ConvolutionalTraining implements Serializable {
      */
     public void train(Dataset trainset, int numberOfIterations ) {
         for ( int t = 0 ; t < numberOfIterations ; t++ ) {
+            System.out.println("Iteration " + t);
+            // how many batches of data to train, given the batch size
             int numberOfTrainings = trainset.size() / batchSize;
             int right = 0;
             int count = 0;
@@ -116,7 +122,7 @@ public class ConvolutionalTraining implements Serializable {
             }
 
             double correctPercent = 1.0 * right / count;
-            if ( t % 10 == 1 && correctPercent > 0.96 ) {
+            if ( t % 10 == 1 && correctPercent > 0.9 ) {
                 learningRate = 0.001 + learningRate * 0.9;
                 System.out.println( "new learning rate: " + learningRate );
             }
@@ -137,7 +143,7 @@ public class ConvolutionalTraining implements Serializable {
 
 
     /**
-     * Update the parameters.
+     * Update the filters and biases
      */
     private void updateParams() {
         for ( int i = 1 ; i < numberOfLayers ; i++ ) {
@@ -147,7 +153,7 @@ public class ConvolutionalTraining implements Serializable {
                 case CONV:
                 case OUTPUT:
                     updateFilters( layer, previous );
-                    updateBias( layer, previous );
+                    updateBias( layer );
                     break;
             }
         }
@@ -180,6 +186,10 @@ public class ConvolutionalTraining implements Serializable {
     }
 
 
+    /**
+     * The input layer passes the input to the next layer
+     * @param record
+     */
     private void setInputLayerOutput( Record record ) {
         Layer inputLayer = layers.get(0);
         Size outputSize = inputLayer.getOutputSize();
@@ -194,19 +204,24 @@ public class ConvolutionalTraining implements Serializable {
     }
 
 
+    /**
+     * Compute the output of a convolutional layer and apply sigmoid activation function.
+     * @param layer the current layer
+     * @param lastLayer the previous layer
+     */
     private void setConvOutput( Layer layer, Layer lastLayer ) {
         int outputDepth = layer.getOutputDepth();
-        int lastOutputDepth = lastLayer.getOutputDepth();
+        int inputDepth = lastLayer.getOutputDepth();
         new Task(outputDepth) {
 
             @Override
-            public void process(int start, int end) {
+            public void process( int start, int end ) {
                 for (int j = start; j < end; j++) {
                     double[][] sum = null;
-                    for (int i = 0; i < lastOutputDepth; i++) {
+                    for (int i = 0; i < inputDepth; i++) {
                         double[][] lastMap = lastLayer.getMap(i);
                         double[][] filter = layer.getFilter(i, j);
-                        if (sum == null) {
+                        if ( sum == null ) {
                             sum = Utilities.convnValid(lastMap, filter);
                         }
                         else {
@@ -217,7 +232,7 @@ public class ConvolutionalTraining implements Serializable {
                     // apply sigmoid activation function
                     for ( int row = 0 ; row < sum.length ; row++ ) {
                         for ( int column = 0 ; column < sum[row].length ; column++ ) {
-                            sum[row][column] = ActivationFunctions.sigmoid( sum[row][column] + bias );
+                            sum[row][column] = ActivationFunctions.sigmoidAF( sum[row][column] + bias );
                         }
                     }
                     layer.setMapValue( j, sum );
@@ -227,12 +242,16 @@ public class ConvolutionalTraining implements Serializable {
         }.start();
     }
 
-
+    /**
+     * Set the output of the maxpooling layer.
+     * @param layer the current layer.
+     * @param lastLayer the previous layer.
+     */
     private void setMaxpoolingOutput( Layer layer, Layer lastLayer ) {
         ConvolutionalLayer previousLayer = (ConvolutionalLayer) lastLayer;
         MaxpoolingLayer maxpoolingLayer = (MaxpoolingLayer) layer;
-        int lastOutputDepth = lastLayer.getOutputDepth();
-        new Task(lastOutputDepth) {
+        int inputDepth = lastLayer.getOutputDepth();
+        new Task(inputDepth) {
 
             @Override
             public void process(int start, int end) {
@@ -260,20 +279,27 @@ public class ConvolutionalTraining implements Serializable {
     }
 
 
+    /**
+     * Update the weights in the current layer.
+     * @param layer the current layer.
+     * @param previous the previous layer.
+     */
     private void updateFilters( Layer layer, Layer previous ) {
         int outputDepth = layer.getOutputDepth();
         int inputDepth = previous.getOutputDepth();
         new Task(outputDepth) {
 
             @Override
-            public void process(int start, int end) {
-                for (int j = start; j < end; j++) {
-                    for (int i = 0; i < inputDepth; i++) {
+            public void process( int start, int end ) {
+                for ( int j = start ; j < end ; j++ ) {
+                    for ( int i = 0 ; i < inputDepth ; i++) {
                         double[][] weightGradient = null;
-                        for (int r = 0; r < batchSize; r++) {
+                        for ( int r = 0; r < batchSize; r++ ) {
+                            // gradients = sum of all (input * error)
                             double[][] error = layer.getError(r, j);
-                            if (weightGradient == null)
+                            if (weightGradient == null) {
                                 weightGradient = Utilities.convnValid(previous.getMap(r, i), error);
+                            }
                             else {
                                 weightGradient =
                                         Utilities.addMatrix( weightGradient, Utilities.convnValid(previous.getMap(r, i), error));
@@ -281,7 +307,7 @@ public class ConvolutionalTraining implements Serializable {
                         }
 
                         double[][] filter = layer.getFilter(i, j);
-                        // calculate the delta matrix then replace it with the new weight
+                        // overwrite the weightGradient matrix with the new weights
                         for ( int row = 0 ; row < weightGradient.length ; row ++ ) {
                             for ( int column = 0 ; column < weightGradient[row].length ; column ++ ) {
                                 weightGradient[row][column] /= batchSize;
@@ -299,8 +325,11 @@ public class ConvolutionalTraining implements Serializable {
         }.start();
     }
 
-
-    private void updateBias( Layer layer, Layer previous ) {
+    /**
+     * Update the bias weights at a layer.
+     * @param layer the specified layer.
+     */
+    private void updateBias( Layer layer ) {
         double[][][][] errors = layer.getErrors();
         int outputDepth = layer.getOutputDepth();
 
@@ -396,7 +425,6 @@ public class ConvolutionalTraining implements Serializable {
         for (int m = 0; m < outputDepth; m++) {
             double[][] outmap = outputLayer.getMap(m);
             outmaps[m] = outmap[0][0];
-
         }
         int lable = record.getLable().intValue();
         target[lable] = 1;
